@@ -3,9 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Humana Kentucky Derby Racing</title>
+<title>Kentucky Derby Chibi Racing</title>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
 <style>
+  /* [All your existing CSS stays the same] */
   :root {
     --derby-green:#2d5016;--derby-gold:#c8972a;--derby-red:#8b1a1a;
     --derby-cream:#f5f0e8;--derby-brown:#5c3317;--derby-dark:#1a0f0a;
@@ -153,7 +160,6 @@
   .your-horse-highlight{border:2px solid var(--derby-gold)!important;background:rgba(200,151,42,.08)!important;}
   .mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-20{margin-top:20px;}
 
-  /* User Management Styles */
   .user-mgmt-row{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.5);border-radius:8px;margin-bottom:8px;}
   .user-mgmt-row:hover{background:rgba(255,255,255,.8);}
   .user-mgmt-info{flex:1;min-width:0;}
@@ -161,11 +167,14 @@
   .user-mgmt-sub{font-size:11px;color:#666;}
   .user-mgmt-actions{display:flex;gap:6px;flex-shrink:0;}
 
-  /* Add User Form */
   .add-user-form{background:rgba(200,151,42,.08);border:1px solid rgba(200,151,42,.3);border-radius:8px;padding:16px;margin-bottom:14px;}
   .add-user-form h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--derby-brown);margin-bottom:12px;}
 
-  /* RIDE OVERLAY - FIXED ANIMATION */
+  /* Loading indicator */
+  .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:9999;}
+  .loading-spinner{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--derby-gold);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;}
+  @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+
   #ride-overlay{display:none;position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#0a1a05 0%,#1a3a0a 40%,#2a5c14 70%,#c4945a 70%,#a07040 100%);overflow:hidden;flex-direction:column;align-items:center;justify-content:center;}
   #ride-overlay.active{display:flex;}
   .ride-cloud{position:absolute;border-radius:50px;background:rgba(255,255,255,.12);animation:cloud-drift linear infinite;}
@@ -179,19 +188,8 @@
   .dust-puff{position:absolute;border-radius:50%;background:rgba(196,148,90,.6);animation:dust-rise .8s ease-out forwards;}
   @keyframes dust-rise{0%{transform:scale(.2) translateY(0);opacity:.8;}100%{transform:scale(1.5) translateY(-40px);opacity:0;}}
   
-  /* FIXED: Horse stays centered, only gallops in place */
-  .ride-scene{
-    position:absolute;
-    bottom:28%;
-    left:50%;
-    transform:translateX(-50%);
-    animation:horse-gallop .25s ease-in-out infinite alternate;
-  }
-  
-  @keyframes horse-gallop{
-    0%{transform:translateX(-50%) translateY(0) rotate(-1deg);}
-    100%{transform:translateX(-50%) translateY(-6px) rotate(1deg);}
-  }
+  .ride-scene{position:absolute;bottom:28%;left:50%;transform:translateX(-50%);animation:horse-gallop .25s ease-in-out infinite alternate;}
+  @keyframes horse-gallop{0%{transform:translateX(-50%) translateY(0) rotate(-1deg);}100%{transform:translateX(-50%) translateY(-6px) rotate(1deg);}}
   
   .ride-horse-stack{position:relative;display:inline-block;text-align:center;}
   .ride-avatar-jockey{width:50px;height:50px;border-radius:50%;object-fit:cover;border:3px solid var(--derby-gold);display:block;position:absolute;top:-46px;left:50%;transform:translateX(-50%);animation:jockey-bounce .25s ease-in-out infinite alternate;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
@@ -207,25 +205,8 @@
   .ride-banner-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--derby-gold);font-weight:700;}
   .ride-banner-jockey{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:1px;}
   
-  /* FIXED: Speed lines move right to left for forward motion illusion */
-  .speed-line{
-    position:absolute;
-    height:2px;
-    border-radius:1px;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));
-    animation:speed-fly .3s linear infinite;
-  }
-  
-  @keyframes speed-fly{
-    from{
-      transform:translateX(100vw);
-      opacity:.8;
-    }
-    to{
-      transform:translateX(-100px);
-      opacity:0;
-    }
-  }
+  .speed-line{position:absolute;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:speed-fly .3s linear infinite;}
+  @keyframes speed-fly{from{transform:translateX(100vw);opacity:.8;}to{transform:translateX(-100px);opacity:0;}}
 
   @media(max-width:600px){
     .panel{padding:20px 16px;}.form-row{grid-template-columns:1fr;}.tabs{flex-wrap:wrap;}
@@ -237,6 +218,12 @@
 </head>
 <body>
 <div id="app">
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div style="color:#fff;margin-left:15px;font-size:16px;">Connecting to Derby...</div>
+  </div>
+
   <header class="site-header">
     <div class="site-title">Kentucky Derby Chibi Racing</div>
     <div class="site-subtitle">Roll the dice &mdash; Race to glory</div>
@@ -433,7 +420,6 @@
         <div id="admin-player-list"></div>
       </div>
 
-      <!-- Add User Section -->
       <div class="admin-section">
         <h4>➕ Add New User</h4>
         <div class="add-user-form">
@@ -464,7 +450,6 @@
         </div>
       </div>
 
-      <!-- Remove User Section -->
       <div class="admin-section">
         <h4>🗑️ Remove User</h4>
         <div id="admin-user-mgmt-list"></div>
@@ -510,40 +495,134 @@
 
 <script>
 // =========================================================
-// DB
+// FIREBASE CONFIGURATION - REPLACE WITH YOUR OWN!
 // =========================================================
-const DB = {
-  get users(){return JSON.parse(localStorage.getItem('derby_users')||'{}');},
-  setUsers(u){localStorage.setItem('derby_users',JSON.stringify(u));},
-  get session(){return localStorage.getItem('derby_session')||null;},
-  setSession(u){u?localStorage.setItem('derby_session',u):localStorage.removeItem('derby_session');},
-  get settings(){
-    return JSON.parse(localStorage.getItem('derby_settings')||JSON.stringify({numDice:2,rule:'sum',raceLength:100,startDt:'',endDt:'',forceStatus:''}));
-  },
-  setSettings(s){localStorage.setItem('derby_settings',JSON.stringify(s));},
-  getUser(u){return this.users[u]||null;},
-  saveUser(u,d){const a=this.users;a[u]=d;this.setUsers(a);},
-  getTodayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+const firebaseConfig = {
+  apiKey: "AIzaSyDLBmFxSX-CNO5U-ImVo_FcDBJwSa7rvO8",
+  authDomain: "humana-derby-horse-racing.firebaseapp.com",
+  databaseURL: "https://humana-derby-horse-racing-default-rtdb.firebaseio.com",
+  projectId: "humana-derby-horse-racing",
+  storageBucket: "humana-derby-horse-racing.firebasestorage.app",
+  messagingSenderId: "67011797802",
+  appId: "1:67011797802:web:8647425e01a7a3fcb5b453"
 };
 
-(function seedAdmin(){
-  const u=DB.users;
-  if(!u['admin']){
-    u['admin']={username:'admin',password:'admin123',isAdmin:true,jockey:{name:'The Commissioner',color:'red'},horse:{name:'Official',emoji:'🐎',color:'#8B4513'},distance:0,rolls:{},pendingBoost:0,photo:''};
-    DB.setUsers(u);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+// =========================================================
+// DB - Now uses Firebase instead of localStorage
+// =========================================================
+const DB = {
+  async getUsers(){
+    const snapshot = await db.ref('users').once('value');
+    return snapshot.val() || {};
+  },
+  async setUsers(u){
+    await db.ref('users').set(u);
+  },
+  async getUser(username){
+    const snapshot = await db.ref(`users/${username}`).once('value');
+    return snapshot.val();
+  },
+  async saveUser(username, data){
+    await db.ref(`users/${username}`).set(data);
+  },
+  async getSettings(){
+    const snapshot = await db.ref('settings').once('value');
+    return snapshot.val() || {numDice:2,rule:'sum',raceLength:100,startDt:'',endDt:'',forceStatus:''};
+  },
+  async setSettings(s){
+    await db.ref('settings').set(s);
+  },
+  getTodayKey(){
+    const d=new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  },
+  // Listen for real-time updates
+  onUsersUpdate(callback){
+    db.ref('users').on('value', snapshot => {
+      callback(snapshot.val() || {});
+    });
+  },
+  onSettingsUpdate(callback){
+    db.ref('settings').on('value', snapshot => {
+      callback(snapshot.val() || {numDice:2,rule:'sum',raceLength:100});
+    });
   }
-})();
+};
 
 // =========================================================
 // STATE
 // =========================================================
-let currentUser=null, selectedHorseColor='#8B4513', regPhotoDataUrl='', pendingBonusRoll=false, prevLbOrder=[];
+let currentUser=null, selectedHorseColor='#8B4513', regPhotoDataUrl='', pendingBonusRoll=false, prevLbOrder=[], allUsers={}, currentSettings={};
+
+// =========================================================
+// INITIALIZATION
+// =========================================================
+async function initGame(){
+  try {
+    // Load initial data
+    allUsers = await DB.getUsers();
+    currentSettings = await DB.getSettings();
+    
+    // Set up real-time listeners
+    DB.onUsersUpdate(users => {
+      allUsers = users;
+      if(currentUser) {
+        refreshLeaderboard();
+        renderTrack();
+        renderAdminPlayerList();
+        renderAdminUserMgmtList();
+        populateAdminPlayerSelect();
+      }
+    });
+    
+    DB.onSettingsUpdate(settings => {
+      currentSettings = settings;
+      updateGameStatusBanner();
+      if(document.getElementById('tab-admin') && !document.getElementById('tab-admin').classList.contains('hidden')){
+        updateAdminStatusIndicator();
+      }
+    });
+    
+    // Hide loading overlay
+    document.getElementById('loading-overlay').classList.add('hidden');
+    
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('current_user');
+    if(savedUser){
+      const user = await DB.getUser(JSON.parse(savedUser).username);
+      if(user) enterGame(user);
+    }
+    
+    // Seed admin account if it doesn't exist
+    if(!allUsers['humana_derby'] && !allUsers['admin']){
+      await DB.saveUser('humana_derby', {
+        username:'humana_derby',
+        password:'Idontknow',
+        isAdmin:true,
+        jockey:{name:'Race Commissioner',color:'red'},
+        horse:{name:'Official Steward',emoji:'🐎',color:'#8B4513'},
+        distance:0,
+        rolls:{},
+        pendingBoost:0,
+        photo:''
+      });
+    }
+  } catch(error){
+    console.error('Failed to initialize:', error);
+    alert('Failed to connect to database. Please refresh the page.');
+  }
+}
 
 // =========================================================
 // GAME STATUS
 // =========================================================
 function getGameStatus(){
-  const s=DB.settings;
+  const s=currentSettings;
   if(s.forceStatus==='active') return 'active';
   if(s.forceStatus==='stopped') return 'stopped';
   const now=Date.now();
@@ -612,16 +691,17 @@ function handleRegPhoto(input){
   reader.readAsDataURL(file);
 }
 
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('login-user').value.trim().toLowerCase();
   const p=document.getElementById('login-pass').value;
   if(!u||!p){showAlert('login-alert','Please fill all fields');return;}
-  const user=DB.getUser(u);
+  const user=await DB.getUser(u);
   if(!user||user.password!==p){showAlert('login-alert','Invalid username or password');return;}
-  DB.setSession(u); enterGame(user);
+  localStorage.setItem('current_user',JSON.stringify({username:u}));
+  enterGame(user);
 }
 
-function doRegister(){
+async function doRegister(){
   const u=document.getElementById('reg-user').value.trim().toLowerCase();
   const p=document.getElementById('reg-pass').value;
   const jName=document.getElementById('reg-jockey').value.trim();
@@ -630,15 +710,19 @@ function doRegister(){
   const hEmoji=document.getElementById('reg-horse-type').value;
   if(!u||!p||!jName||!hName){showAlert('reg-alert','Please fill all fields');return;}
   if(u.length<3){showAlert('reg-alert','Username must be at least 3 characters');return;}
-  if(DB.getUser(u)){showAlert('reg-alert','Username already taken');return;}
-  if(u==='admin'){showAlert('reg-alert','Reserved username');return;}
+  if(await DB.getUser(u)){showAlert('reg-alert','Username already taken');return;}
+  if(u==='admin'||u==='humana_derby'){showAlert('reg-alert','Reserved username');return;}
   if(!regPhotoDataUrl){showAlert('reg-alert','Please upload your photo — it\'s required to register!');return;}
   const userData={username:u,password:p,isAdmin:false,jockey:{name:jName,color:jColor},horse:{name:hName,emoji:hEmoji,color:selectedHorseColor},distance:0,rolls:{},pendingBoost:0,photo:regPhotoDataUrl};
-  DB.saveUser(u,userData); DB.setSession(u); enterGame(userData);
+  await DB.saveUser(u,userData);
+  localStorage.setItem('current_user',JSON.stringify({username:u}));
+  enterGame(userData);
 }
 
 function doLogout(){
-  DB.setSession(null); currentUser=null; pendingBonusRoll=false;
+  localStorage.removeItem('current_user');
+  currentUser=null;
+  pendingBonusRoll=false;
   document.getElementById('screen-game').classList.add('hidden');
   document.getElementById('screen-auth').classList.remove('hidden');
 }
@@ -674,10 +758,10 @@ function showGameTab(tab){
 // =========================================================
 // ADMIN
 // =========================================================
-function showAdmin(){
+async function showAdmin(){
   ['race','leaderboard','power'].forEach(t=>document.getElementById(`tab-${t}`).classList.add('hidden'));
   document.querySelectorAll('#game-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
-  const s=DB.settings;
+  const s=currentSettings;
   document.getElementById('admin-num-dice').value=s.numDice;
   document.getElementById('admin-race-length').value=s.raceLength;
   document.getElementById('admin-start-dt').value=s.startDt||'';
@@ -701,45 +785,73 @@ function updateAdminStatusIndicator(){
   el.textContent=labels[status]||status; el.className='game-status-badge '+(cls[status]||'');
 }
 
-function adminForceStart(){const s=DB.settings;s.forceStatus='active';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
-function adminForceStop(){const s=DB.settings;s.forceStatus='stopped';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
-function adminClearForce(){const s=DB.settings;s.forceStatus='';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
+async function adminForceStart(){
+  currentSettings.forceStatus='active';
+  await DB.setSettings(currentSettings);
+  updateAdminStatusIndicator();
+  updateGameStatusBanner();
+}
 
-function saveAdminSettings(){
+async function adminForceStop(){
+  currentSettings.forceStatus='stopped';
+  await DB.setSettings(currentSettings);
+  updateAdminStatusIndicator();
+  updateGameStatusBanner();
+}
+
+async function adminClearForce(){
+  currentSettings.forceStatus='';
+  await DB.setSettings(currentSettings);
+  updateAdminStatusIndicator();
+  updateGameStatusBanner();
+}
+
+async function saveAdminSettings(){
   const numDice=Math.min(6,Math.max(1,parseInt(document.getElementById('admin-num-dice').value)||2));
   const raceLength=Math.min(500,Math.max(20,parseInt(document.getElementById('admin-race-length').value)||100));
   const rule=(document.querySelector('.rule-chip.active')||{dataset:{rule:'sum'}}).dataset.rule;
   const startDt=document.getElementById('admin-start-dt').value;
   const endDt=document.getElementById('admin-end-dt').value;
-  const s=DB.settings;
-  DB.setSettings({...s,numDice,rule,raceLength,startDt,endDt});
+  currentSettings={...currentSettings,numDice,rule,raceLength,startDt,endDt};
+  await DB.setSettings(currentSettings);
   const msg=document.getElementById('admin-save-msg');
   msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2500);
   updateAdminStatusIndicator(); updateGameStatusBanner();
 }
 
-function adminResetRace(){
+async function adminResetRace(){
   if(!confirm('Reset ALL player progress? This cannot be undone.')) return;
-  const users=DB.users;
-  Object.keys(users).forEach(k=>{users[k].distance=0;users[k].rolls={};users[k].pendingBoost=0;});
-  DB.setUsers(users); currentUser=DB.getUser(currentUser.username);
-  renderAdminPlayerList(); renderAdminUserMgmtList(); alert('Race reset! All distances cleared.');
+  const users=allUsers;
+  Object.keys(users).forEach(k=>{
+    if(!users[k].isAdmin){
+      users[k].distance=0;
+      users[k].rolls={};
+      users[k].pendingBoost=0;
+    }
+  });
+  await DB.setUsers(users);
+  allUsers=users;
+  if(currentUser) currentUser=await DB.getUser(currentUser.username);
+  renderAdminPlayerList();
+  renderAdminUserMgmtList();
+  alert('Race reset! All distances cleared.');
 }
 
 function populateAdminPlayerSelect(){
   const sel=document.getElementById('admin-roll-player');
-  const players=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const players=Object.values(allUsers).filter(u=>!u.isAdmin);
   sel.innerHTML=players.length?players.map(u=>`<option value="${u.username}">${u.horse.emoji} ${u.horse.name} (@${u.username})</option>`).join(''):'<option>No players yet</option>';
 }
 
 // =========================================================
 // ADMIN ROLL FOR PLAYER - WITH ANIMATION
 // =========================================================
-function adminRollForPlayer(){
+async function adminRollForPlayer(){
   const uname=document.getElementById('admin-roll-player').value;
   if(!uname || uname === 'No players yet') return;
-  const user=DB.getUser(uname); if(!user||user.isAdmin) return;
-  const s=DB.settings;
+  const user=await DB.getUser(uname);
+  if(!user||user.isAdmin) return;
+  const s=currentSettings;
   const todayKey=DB.getTodayKey();
   const rolls=Array.from({length:s.numDice},()=>Math.ceil(Math.random()*6));
   const boost=user.pendingBoost||0;
@@ -748,12 +860,10 @@ function adminRollForPlayer(){
   if(!user.rolls) user.rolls={};
   user.rolls[todayKey]=(user.rolls[todayKey]||[]).concat(rolls);
   user.pendingBoost=0;
-  DB.saveUser(uname,user);
+  await DB.saveUser(uname,user);
   
-  // Show text result
   document.getElementById('admin-roll-result').textContent=`Rolled for ${user.horse.name}: ${formatFormula(rolls,s.rule)} → +${dist} furlongs${boost?` (incl. ${boost}% boost)`:''}`;
   
-  // Play riding animation
   playRidingAnimation(user,dist,()=>{
     renderAdminPlayerList();
     renderAdminUserMgmtList();
@@ -765,7 +875,7 @@ function adminRollForPlayer(){
 // =========================================================
 // ADMIN ADD USER
 // =========================================================
-function adminAddUser(){
+async function adminAddUser(){
   const username=document.getElementById('add-user-username').value.trim().toLowerCase();
   const password=document.getElementById('add-user-password').value;
   const jockeyName=document.getElementById('add-user-jockey').value.trim()||'Jockey';
@@ -784,7 +894,7 @@ function adminAddUser(){
     msgEl.style.color='#a00';
     return;
   }
-  if(DB.getUser(username)){
+  if(await DB.getUser(username)){
     msgEl.textContent='❌ Username already exists';
     msgEl.style.color='#a00';
     return;
@@ -807,18 +917,16 @@ function adminAddUser(){
     photo:''
   };
   
-  DB.saveUser(username,userData);
+  await DB.saveUser(username,userData);
   
   msgEl.textContent='✓ User added!';
   msgEl.style.color='#1a6b1a';
   
-  // Clear form
   document.getElementById('add-user-username').value='';
   document.getElementById('add-user-password').value='';
   document.getElementById('add-user-jockey').value='';
   document.getElementById('add-user-horse').value='';
   
-  // Refresh lists
   renderAdminUserMgmtList();
   populateAdminPlayerSelect();
   renderAdminPlayerList();
@@ -829,14 +937,12 @@ function adminAddUser(){
 // =========================================================
 // ADMIN REMOVE USER
 // =========================================================
-function adminRemoveUser(username){
-  const user=DB.getUser(username);
+async function adminRemoveUser(username){
+  const user=await DB.getUser(username);
   if(!user) return;
   if(!confirm(`Remove user "${username}" (${user.horse.name})?\n\nThis will delete all their progress!`)) return;
   
-  const users=DB.users;
-  delete users[username];
-  DB.setUsers(users);
+  await db.ref(`users/${username}`).remove();
   
   renderAdminUserMgmtList();
   renderAdminPlayerList();
@@ -848,7 +954,7 @@ function adminRemoveUser(username){
 // RENDER USER MANAGEMENT LIST
 // =========================================================
 function renderAdminUserMgmtList(){
-  const users=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const users=Object.values(allUsers).filter(u=>!u.isAdmin);
   const container=document.getElementById('admin-user-mgmt-list');
   
   if(!users.length){
@@ -881,7 +987,7 @@ function adminRollForUserDirect(username){
 }
 
 function renderAdminPlayerList(){
-  const list=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const list=Object.values(allUsers).filter(u=>!u.isAdmin);
   const container=document.getElementById('admin-player-list');
   if(!list.length){
     container.innerHTML='<em style="color:#999">No players yet.</em>';
@@ -925,10 +1031,11 @@ function allSame(rolls){return rolls.length>1&&rolls.every(r=>r===rolls[0]);}
 // =========================================================
 // RACE TAB
 // =========================================================
-function refreshRaceTab(){
+async function refreshRaceTab(){
   if(!currentUser) return;
-  const s=DB.settings;
-  const user=DB.getUser(currentUser.username); currentUser=user;
+  const s=currentSettings;
+  const user=await DB.getUser(currentUser.username);
+  currentUser=user;
   document.getElementById('race-rules-info').innerHTML=
     `<span class="info-chip">🎲 ${s.numDice} Dice</span>
      <span class="info-chip">📐 ${ruleLabel(s.rule)}</span>
@@ -961,17 +1068,17 @@ function setupDiceDisplay(n,vals){
   for(let i=0;i<n;i++){const d=document.createElement('div');d.className='die';d.id=`die-${i}`;d.textContent=vals?getDiceEmoji(vals[i]):'🎲';c.appendChild(d);}
 }
 
-function rollDice(){
-  const s=DB.settings;
+async function rollDice(){
+  const s=currentSettings;
   if(getGameStatus()!=='active') return;
   const todayKey=DB.getTodayKey();
-  const user=DB.getUser(currentUser.username);
+  const user=await DB.getUser(currentUser.username);
   if(user.rolls&&user.rolls[todayKey]&&!pendingBonusRoll) return;
   document.getElementById('roll-btn').disabled=true;
   document.getElementById('bonus-roll-banner').classList.add('hidden');
   for(let i=0;i<s.numDice;i++) document.getElementById(`die-${i}`).classList.add('rolling');
   let ticks=0;
-  const iv=setInterval(()=>{
+  const iv=setInterval(async ()=>{
     ticks++;
     for(let i=0;i<s.numDice;i++) document.getElementById(`die-${i}`).textContent=getDiceEmoji(Math.ceil(Math.random()*6));
     if(ticks>=15){
@@ -989,10 +1096,11 @@ function rollDice(){
       if(!user.rolls) user.rolls={};
       user.rolls[todayKey]=[...(user.rolls[todayKey]||[]),...rolls];
       if(!pendingBonusRoll) user.pendingBoost=0;
-      DB.saveUser(user.username,user); currentUser=user;
+      await DB.saveUser(user.username,user);
+      currentUser=user;
       pendingBonusRoll=false;
       const isBonus=allSame(rolls)&&s.numDice>1;
-      playRidingAnimation(user,dist,()=>{
+      playRidingAnimation(user,dist,async ()=>{
         document.getElementById('roll-result-area').classList.remove('hidden');
         if(isBonus){
           pendingBonusRoll=true;
@@ -1013,8 +1121,8 @@ function rollDice(){
 }
 
 function renderTrack(){
-  const s=DB.settings;
-  const allPlayers=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const s=currentSettings;
+  const allPlayers=Object.values(allUsers).filter(u=>!u.isAdmin);
   const c=document.getElementById('race-lanes');
   if(!allPlayers.length){c.innerHTML='<div style="color:rgba(245,240,232,.5);text-align:center;padding:20px;font-size:14px;">No racers yet!</div>';return;}
   const maxDist=Math.max(s.raceLength,...allPlayers.map(u=>u.distance||0));
@@ -1046,9 +1154,9 @@ const POWERUPS=[
   {mult:200, label:'+200% Speed', prob:3,  color:'#ff9800'},
 ];
 
-function refreshPowerTab(){
+async function refreshPowerTab(){
   if(!currentUser) return;
-  const user=DB.getUser(currentUser.username);
+  const user=await DB.getUser(currentUser.username);
   const hasBoost=user.pendingBoost>0;
   const canAfford=user.distance>=3;
   document.getElementById('power-content').innerHTML=`
@@ -1077,12 +1185,12 @@ function refreshPowerTab(){
     </div>`;
 }
 
-function spinWheel(){
-  const user=DB.getUser(currentUser.username);
+async function spinWheel(){
+  const user=await DB.getUser(currentUser.username);
   if(user.distance<3){showAlert && alert('Not enough furlongs!');return;}
   document.querySelectorAll('.powerup-card').forEach(c=>c.classList.add('disabled'));
   let ticks=0,curr=0;
-  const iv=setInterval(()=>{
+  const iv=setInterval(async ()=>{
     ticks++;
     document.querySelectorAll('.powerup-card').forEach(c=>c.classList.remove('selected'));
     curr=(curr+1)%POWERUPS.length;
@@ -1094,7 +1202,8 @@ function spinWheel(){
       for(const p of POWERUPS){acc+=p.prob;if(rand<acc){result=p;break;}}
       document.querySelectorAll('.powerup-card').forEach((c,i)=>{c.classList.remove('selected');if(POWERUPS[i].mult===result.mult) c.classList.add('selected');});
       user.distance-=3; user.pendingBoost=result.mult;
-      DB.saveUser(user.username,user); currentUser=user;
+      await DB.saveUser(user.username,user);
+      currentUser=user;
       document.getElementById('spin-result-area').innerHTML=`<div class="spin-result" style="border:2px solid ${result.color};color:${result.color};background:rgba(0,0,0,.04);">
         ${result.mult===0?'😔 No boost this time — try again tomorrow!':'🎉 +'+result.mult+'% boost on your next roll!'}
       </div>`;
@@ -1108,10 +1217,10 @@ function spinWheel(){
 // LEADERBOARD
 // =========================================================
 function refreshLeaderboard(){
-  const sorted=Object.values(DB.users).filter(u=>!u.isAdmin).sort((a,b)=>(b.distance||0)-(a.distance||0)).slice(0,10);
+  const sorted=Object.values(allUsers).filter(u=>!u.isAdmin).sort((a,b)=>(b.distance||0)-(a.distance||0)).slice(0,10);
   const medals=['🥇','🥈','🥉'];
   const list=document.getElementById('leaderboard-list');
-  const s=DB.settings;
+  const s=currentSettings;
   const maxDist=Math.max(1,s.raceLength,...sorted.map(u=>u.distance||0));
   if(!sorted.length){list.innerHTML='<li class="no-players">No racers yet. Register and start rolling!</li>';prevLbOrder=[];return;}
   const prevRankMap={};prevLbOrder.forEach((u,i)=>{prevRankMap[u]=i;});
@@ -1198,21 +1307,9 @@ function updateHorsePreview(){
 }
 
 // =========================================================
-// AUTO-REFRESH (every 10s)
-// =========================================================
-setInterval(()=>{
-  if(!currentUser) return;
-  if(!document.getElementById('tab-leaderboard').classList.contains('hidden')) refreshLeaderboard();
-  if(!document.getElementById('tab-race').classList.contains('hidden')) renderTrack();
-  updateGameStatusBanner();
-},10000);
-
-// =========================================================
 // BOOT
 // =========================================================
-(function boot(){
-  const s=DB.session; if(s){const u=DB.getUser(s);if(u){enterGame(u);return;}}
-})();
+window.onload = initGame;
 </script>
 </body>
 </html>
