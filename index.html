@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kentucky Derby Chibi Racing</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --derby-green:#2d5016;--derby-gold:#c8972a;--derby-red:#8b1a1a;
+    --derby-cream:#f5f0e8;--derby-brown:#5c3317;--derby-dark:#1a0f0a;
+    --track-dirt:#c4945a;--panel-bg:rgba(245,240,232,0.97);
+    --shadow:0 4px 24px rgba(26,15,10,0.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--derby-dark);color:var(--derby-cream);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(44,80,22,.3) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(139,26,26,.2) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  #app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 16px 40px;}
+
+  .site-header{text-align:center;padding:32px 0 20px;border-bottom:2px solid var(--derby-gold);margin-bottom:28px;position:relative;}
+  .site-header::after{content:'🐎';position:absolute;left:50%;transform:translateX(-50%) scaleX(-1);bottom:-22px;font-size:32px;background:var(--derby-dark);padding:0 12px;}
+  .site-title{font-family:'Rye',serif;font-size:clamp(28px,5vw,52px);color:var(--derby-gold);text-shadow:2px 2px 0 var(--derby-brown),0 0 30px rgba(200,151,42,.4);letter-spacing:2px;}
+  .site-subtitle{font-size:13px;color:rgba(245,240,232,.6);letter-spacing:4px;text-transform:uppercase;margin-top:4px;}
+
+  .user-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.35);border-radius:10px;padding:10px 16px;margin-bottom:20px;}
+  .user-bar-info{display:flex;align-items:center;gap:12px;}
+  .user-avatar-circle{width:44px;height:44px;border-radius:50%;border:2px solid var(--derby-gold);object-fit:cover;flex-shrink:0;}
+  .user-detail-name{font-weight:700;font-size:15px;color:var(--derby-dark);}
+  .user-detail-sub{font-size:12px;color:#666;}
+
+  .panel{background:var(--panel-bg);color:var(--derby-dark);border-radius:12px;padding:28px 32px;box-shadow:var(--shadow);border:1px solid rgba(200,151,42,.3);margin-bottom:20px;}
+  .panel h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--derby-red);margin-bottom:20px;border-bottom:1px solid rgba(200,151,42,.4);padding-bottom:10px;}
+  .panel h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--derby-brown);margin-bottom:12px;}
+
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--derby-brown);margin-bottom:6px;}
+  .form-group input,.form-group select{width:100%;padding:10px 14px;border:1.5px solid rgba(92,51,23,.3);border-radius:8px;font-family:'Lato',sans-serif;font-size:14px;background:#fff;color:var(--derby-dark);transition:border-color .2s;}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--derby-gold);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .avatar-upload-area{border:2px dashed rgba(92,51,23,.4);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(200,151,42,.04);}
+  .avatar-upload-area:hover{border-color:var(--derby-gold);background:rgba(200,151,42,.08);}
+  .avatar-upload-area input[type=file]{display:none;}
+  .avatar-preview-ring{width:90px;height:90px;border-radius:50%;border:3px solid var(--derby-gold);object-fit:cover;margin:0 auto 10px;display:block;}
+  .avatar-upload-hint{font-size:12px;color:#888;margin-top:6px;}
+
+  .btn{display:inline-block;padding:11px 28px;border-radius:8px;border:none;cursor:pointer;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;transition:all .18s;text-transform:uppercase;}
+  .btn-primary{background:var(--derby-red);color:#fff;}
+  .btn-primary:hover{background:#a02020;transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,26,26,.4);}
+  .btn-gold{background:var(--derby-gold);color:var(--derby-dark);}
+  .btn-gold:hover{background:#d4a030;transform:translateY(-1px);}
+  .btn-green{background:var(--derby-green);color:#fff;}
+  .btn-green:hover{background:#1e3a0e;}
+  .btn-sm{padding:7px 16px;font-size:12px;}
+  .btn-outline{background:transparent;border:2px solid var(--derby-gold);color:var(--derby-gold);}
+  .btn-outline:hover{background:rgba(200,151,42,.1);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+  .btn-danger{background:#dc3545;color:#fff;}
+  .btn-danger:hover{background:#c82333;transform:translateY(-1px);}
+
+  .tabs{display:flex;gap:4px;margin-bottom:20px;}
+  .tab-btn{flex:1;padding:10px 8px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;background:rgba(245,240,232,.3);color:var(--derby-cream);text-transform:uppercase;transition:all .2s;border-bottom:2px solid transparent;}
+  .tab-btn.active{background:var(--panel-bg);color:var(--derby-red);border-bottom:2px solid var(--derby-gold);}
+
+  .alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+  .alert-err{background:#fdecea;color:#a00;border:1px solid #f5b5b5;}
+  .alert-ok{background:#eaf4ea;color:#1a6b1a;border:1px solid #9dd09d;}
+  .alert-warn{background:#fff8e1;color:#7a5000;border:1px solid #ffe082;}
+
+  .horse-preview-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .horse-preview-box{width:130px;height:130px;border-radius:16px;border:3px solid var(--derby-gold);background:linear-gradient(135deg,#f0e8d0 60%,#e8d8b0);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+  .chibi-horse{font-size:72px;line-height:1;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.18));}
+  .color-swatches{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0;}
+  .swatch.active,.swatch:hover{border-color:var(--derby-gold);transform:scale(1.15);}
+
+  .track-wrap{background:var(--derby-dark);border-radius:12px;padding:20px 16px;overflow:hidden;border:2px solid rgba(200,151,42,.25);}
+  .track-title{font-family:'Rye',serif;font-size:16px;color:var(--derby-gold);text-align:center;margin-bottom:16px;}
+  .track-lane{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .lane-label{width:44px;font-size:11px;color:rgba(245,240,232,.6);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lane-track{flex:1;height:40px;background:var(--track-dirt);border-radius:20px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.2);}
+  .lane-track::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.12);border-radius:20px 20px 0 0;}
+  .lane-progress{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:flex-end;padding-right:3px;min-width:44px;}
+  .lane-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8);flex-shrink:0;}
+  .lane-dist{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(245,240,232,.85);font-weight:700;white-space:nowrap;}
+  .finish-line{position:absolute;right:0;top:0;bottom:0;width:8px;background:repeating-linear-gradient(180deg,#fff 0,#fff 4px,#000 4px,#000 8px);opacity:.5;border-radius:0 20px 20px 0;}
+
+  .dice-area{text-align:center;padding:20px 0;}
+  .dice-display{display:flex;justify-content:center;gap:16px;margin:20px 0;flex-wrap:wrap;}
+  .die{width:60px;height:60px;border-radius:12px;background:#fff;border:2px solid var(--derby-brown);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:3px 3px 0 var(--derby-brown);}
+  .die.rolling{animation:roll .5s ease-in-out infinite alternate;}
+  @keyframes roll{0%{transform:rotate(-10deg) scale(.95);}100%{transform:rotate(10deg) scale(1.05);}}
+  .roll-formula{font-size:13px;color:#666;margin-top:4px;}
+  .distance-gained{font-size:28px;font-weight:700;color:var(--derby-green);margin-top:8px;}
+  .bonus-roll-banner{background:rgba(200,151,42,.15);border:2px solid var(--derby-gold);border-radius:10px;padding:14px 20px;margin:14px 0;text-align:center;animation:pop-in .4s ease-out;}
+  @keyframes pop-in{0%{transform:scale(.8);opacity:0;}70%{transform:scale(1.05);}100%{transform:scale(1);opacity:1;}}
+  .bonus-roll-text{font-family:'Playfair Display',serif;font-size:18px;color:var(--derby-red);font-weight:700;}
+  .boost-badge{display:inline-block;background:var(--derby-green);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:5px;vertical-align:middle;}
+
+  .admin-badge{display:inline-block;background:var(--derby-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:1px;margin-left:8px;vertical-align:middle;}
+  .admin-section{border:1px solid rgba(139,26,26,.3);border-radius:8px;padding:16px;margin-bottom:14px;background:rgba(139,26,26,.04);}
+  .admin-section h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--derby-red);margin-bottom:12px;}
+  .rule-chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .rule-chip{padding:7px 16px;border-radius:20px;border:2px solid rgba(92,51,23,.3);font-size:13px;cursor:pointer;transition:all .2s;background:#fff;color:var(--derby-dark);}
+  .rule-chip.active{background:var(--derby-green);color:#fff;border-color:var(--derby-green);}
+  .admin-player-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.07);}
+  .admin-player-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--derby-gold);flex-shrink:0;}
+  .game-status-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+  .status-active{background:#eaf4ea;color:#1a6b1a;border:1px solid #9dd09d;}
+  .status-inactive{background:#fdecea;color:#a00;border:1px solid #f5b5b5;}
+  .status-scheduled{background:#fff8e1;color:#7a5000;border:1px solid #ffe082;}
+
+  .powerup-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:16px 0;}
+  .powerup-card{border:2px solid rgba(92,51,23,.2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;background:#fff;}
+  .powerup-card:hover{border-color:var(--derby-gold);transform:translateY(-2px);}
+  .powerup-card.selected{border-color:var(--derby-gold);background:rgba(200,151,42,.1);box-shadow:0 0 0 2px var(--derby-gold);}
+  .powerup-card.disabled{opacity:.45;pointer-events:none;}
+  .powerup-mult{font-size:20px;font-weight:700;font-family:'Rye',serif;}
+  .powerup-label{font-size:11px;color:#555;margin-top:3px;}
+  .powerup-prob{font-size:10px;color:var(--derby-brown);margin-top:3px;font-weight:700;}
+  .spin-result{font-size:17px;font-weight:700;padding:14px 24px;border-radius:12px;margin:14px 0;animation:pop-in .5s ease-out;display:inline-block;}
+
+  .leaderboard-list{list-style:none;}
+  .leaderboard-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;background:rgba(245,240,232,.6);border:1px solid rgba(200,151,42,.2);animation:lb-slide-in .4s ease-out both;position:relative;overflow:hidden;}
+  .leaderboard-item:nth-child(1){background:rgba(255,215,0,.18);border-color:var(--derby-gold);}
+  .leaderboard-item:nth-child(2){background:rgba(192,192,192,.18);border-color:#aaa;}
+  .leaderboard-item:nth-child(3){background:rgba(205,127,50,.18);border-color:#cd7f32;}
+  @keyframes lb-slide-in{from{opacity:0;transform:translateX(-30px);}to{opacity:1;transform:translateX(0);}}
+  .rank-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:rgba(92,51,23,.12);color:var(--derby-brown);flex-shrink:0;}
+  .lb-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(200,151,42,.5);flex-shrink:0;}
+  .lb-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:rgba(200,151,42,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .lb-horse-emoji{font-size:22px;flex-shrink:0;}
+  .lb-info{flex:1;min-width:0;}
+  .lb-name{font-weight:700;font-size:14px;color:var(--derby-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lb-jockey{font-size:11px;color:#666;}
+  .lb-dist{font-size:15px;font-weight:700;color:var(--derby-red);white-space:nowrap;}
+  .lb-horse-gallop{animation:lb-trot .5s ease-in-out infinite alternate;}
+  @keyframes lb-trot{0%{transform:translateY(0) rotate(-3deg);}100%{transform:translateY(-3px) rotate(3deg);}}
+  .lb-progress-bar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--derby-gold),var(--derby-red));transition:width 1s ease-out;}
+  .leaderboard-item:nth-child(1) .lb-progress-bar{background:linear-gradient(90deg,#ffd700,#ffaa00);}
+  .leaderboard-item:nth-child(2) .lb-progress-bar{background:linear-gradient(90deg,#c0c0c0,#a0a0a0);}
+  .leaderboard-item:nth-child(3) .lb-progress-bar{background:linear-gradient(90deg,#cd7f32,#a06020);}
+  .lb-shine{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:lb-shine-sweep 2s .5s ease-in-out forwards;}
+  @keyframes lb-shine-sweep{from{left:-60%;}to{left:110%;}}
+
+  .section-divider{border:none;border-top:1px solid rgba(200,151,42,.2);margin:20px 0;}
+  .hidden{display:none!important;}
+  .badge-live{display:inline-block;background:#e83333;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:1px;margin-left:8px;animation:blink 1.5s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .no-players{text-align:center;color:#999;font-style:italic;padding:20px 0;font-size:14px;}
+  .chips-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+  .info-chip{background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.35);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--derby-brown);}
+  .your-horse-highlight{border:2px solid var(--derby-gold)!important;background:rgba(200,151,42,.08)!important;}
+  .mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-20{margin-top:20px;}
+
+  /* User Management Styles */
+  .user-mgmt-row{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.5);border-radius:8px;margin-bottom:8px;}
+  .user-mgmt-row:hover{background:rgba(255,255,255,.8);}
+  .user-mgmt-info{flex:1;min-width:0;}
+  .user-mgmt-name{font-weight:700;font-size:13px;color:var(--derby-dark);}
+  .user-mgmt-sub{font-size:11px;color:#666;}
+  .user-mgmt-actions{display:flex;gap:6px;flex-shrink:0;}
+
+  /* Add User Form */
+  .add-user-form{background:rgba(200,151,42,.08);border:1px solid rgba(200,151,42,.3);border-radius:8px;padding:16px;margin-bottom:14px;}
+  .add-user-form h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--derby-brown);margin-bottom:12px;}
+
+  /* RIDE OVERLAY - FIXED ANIMATION */
+  #ride-overlay{display:none;position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#0a1a05 0%,#1a3a0a 40%,#2a5c14 70%,#c4945a 70%,#a07040 100%);overflow:hidden;flex-direction:column;align-items:center;justify-content:center;}
+  #ride-overlay.active{display:flex;}
+  .ride-cloud{position:absolute;border-radius:50px;background:rgba(255,255,255,.12);animation:cloud-drift linear infinite;}
+  @keyframes cloud-drift{from{transform:translateX(110vw);}to{transform:translateX(-30vw);}}
+  .ride-star{position:absolute;border-radius:50%;background:#fff;}
+  .ride-ground{position:absolute;bottom:0;left:0;right:0;height:30%;background:linear-gradient(180deg,#c4945a 0%,#a07040 100%);overflow:hidden;}
+  .ride-ground::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.2);}
+  .ground-lines{position:absolute;top:8px;left:0;right:0;display:flex;gap:60px;animation:ground-scroll .25s linear infinite;}
+  @keyframes ground-scroll{from{transform:translateX(0);}to{transform:translateX(-60px);}}
+  .ground-line{width:40px;height:2px;background:rgba(255,255,255,.15);flex-shrink:0;border-radius:1px;}
+  .dust-puff{position:absolute;border-radius:50%;background:rgba(196,148,90,.6);animation:dust-rise .8s ease-out forwards;}
+  @keyframes dust-rise{0%{transform:scale(.2) translateY(0);opacity:.8;}100%{transform:scale(1.5) translateY(-40px);opacity:0;}}
+  
+  /* FIXED: Horse stays centered, only gallops in place */
+  .ride-scene{
+    position:absolute;
+    bottom:28%;
+    left:50%;
+    transform:translateX(-50%);
+    animation:horse-gallop .25s ease-in-out infinite alternate;
+  }
+  
+  @keyframes horse-gallop{
+    0%{transform:translateX(-50%) translateY(0) rotate(-1deg);}
+    100%{transform:translateX(-50%) translateY(-6px) rotate(1deg);}
+  }
+  
+  .ride-horse-stack{position:relative;display:inline-block;text-align:center;}
+  .ride-avatar-jockey{width:50px;height:50px;border-radius:50%;object-fit:cover;border:3px solid var(--derby-gold);display:block;position:absolute;top:-46px;left:50%;transform:translateX(-50%);animation:jockey-bounce .25s ease-in-out infinite alternate;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+  @keyframes jockey-bounce{0%{transform:translateX(-50%) rotate(-5deg) translateY(0);}100%{transform:translateX(-50%) rotate(5deg) translateY(-5px);}}
+  .ride-horse-emoji{font-size:72px;line-height:1;display:block;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.5));}
+  .ride-counter{position:absolute;top:10%;left:50%;transform:translateX(-50%);text-align:center;z-index:2;}
+  .ride-counter-label{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:3px;text-transform:uppercase;}
+  .ride-counter-number{font-family:'Rye',serif;font-size:64px;color:var(--derby-gold);text-shadow:0 0 20px rgba(200,151,42,.6),2px 2px 0 rgba(0,0,0,.5);line-height:1;animation:counter-pop .3s ease-out;}
+  @keyframes counter-pop{0%{transform:scale(.5);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+  .ride-counter-unit{font-size:17px;color:rgba(255,255,255,.7);letter-spacing:2px;}
+  .ride-banner{position:absolute;top:26%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);border:1px solid rgba(200,151,42,.5);border-radius:8px;padding:8px 24px;text-align:center;white-space:nowrap;animation:banner-in .5s .3s ease-out both;}
+  @keyframes banner-in{from{opacity:0;transform:translateX(-50%) translateY(-20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+  .ride-banner-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--derby-gold);font-weight:700;}
+  .ride-banner-jockey{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:1px;}
+  
+  /* FIXED: Speed lines move right to left for forward motion illusion */
+  .speed-line{
+    position:absolute;
+    height:2px;
+    border-radius:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));
+    animation:speed-fly .3s linear infinite;
+  }
+  
+  @keyframes speed-fly{
+    from{
+      transform:translateX(100vw);
+      opacity:.8;
+    }
+    to{
+      transform:translateX(-100px);
+      opacity:0;
+    }
+  }
+
+  @media(max-width:600px){
+    .panel{padding:20px 16px;}.form-row{grid-template-columns:1fr;}.tabs{flex-wrap:wrap;}
+    .ride-counter-number{font-size:44px;}.ride-horse-emoji{font-size:52px;}.ride-avatar-jockey{width:36px;height:36px;top:-34px;}
+    .powerup-grid{grid-template-columns:repeat(3,1fr);}
+    .user-mgmt-row{flex-wrap:wrap;}.user-mgmt-actions{margin-top:8px;width:100%;justify-content:flex-end;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="site-header">
+    <div class="site-title">Kentucky Derby Chibi Racing</div>
+    <div class="site-subtitle">Roll the dice &mdash; Race to glory</div>
+  </header>
+
+  <!-- AUTH -->
+  <div id="screen-auth">
+    <div class="tabs" id="auth-tabs">
+      <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <div id="auth-login" class="panel">
+      <h2>Welcome Back, Jockey</h2>
+      <div id="login-alert" class="hidden"></div>
+      <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="Your username" autocomplete="username"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Ride In</button>
+    </div>
+
+    <div id="auth-register" class="panel hidden">
+      <h2>Join the Race</h2>
+      <div id="reg-alert" class="hidden"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Username</label><input type="text" id="reg-user" placeholder="Unique username"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Choose password"></div>
+      </div>
+
+      <hr class="section-divider">
+      <h3>Your Photo <span style="color:var(--derby-red);font-size:12px;font-family:'Lato',sans-serif;font-style:normal;">* Required — becomes your race avatar</span></h3>
+      <div class="avatar-upload-area" onclick="document.getElementById('reg-photo-input').click()">
+        <input type="file" id="reg-photo-input" accept="image/*" onchange="handleRegPhoto(this)">
+        <img id="reg-photo-preview" class="avatar-preview-ring" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Ccircle cx='45' cy='45' r='45' fill='%23c8972a' opacity='.15'/%3E%3Ctext x='45' y='58' text-anchor='middle' font-size='42'%3E📷%3C/text%3E%3C/svg%3E" alt="Upload photo">
+        <div class="avatar-upload-hint">Click to choose your photo — it will be your jockey face on the track &amp; riding animation!</div>
+      </div>
+
+      <hr class="section-divider">
+      <h3>Your Jockey</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Jockey Name</label><input type="text" id="reg-jockey" placeholder="e.g. Wild Rose"></div>
+        <div class="form-group"><label>Silks Color</label>
+          <select id="reg-jockey-color">
+            <option value="red">Red &amp; Gold</option>
+            <option value="blue">Royal Blue</option>
+            <option value="green">Derby Green</option>
+            <option value="purple">Purple Majesty</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <h3>Your Horse</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Horse Name</label><input type="text" id="reg-horse" placeholder="e.g. Thunder Rose"></div>
+        <div class="form-group"><label>Horse Breed</label>
+          <select id="reg-horse-type" onchange="updateHorsePreview()">
+            <option value="🐎">Bay Thoroughbred</option>
+            <option value="🦄">White Stallion</option>
+            <option value="🐴">Chestnut Mare</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Horse Color</label>
+        <div class="color-swatches" id="horse-color-swatches">
+          <div class="swatch active" data-color="#8B4513" style="background:#8B4513;" onclick="selectHorseColor(this)"></div>
+          <div class="swatch" data-color="#F5F5DC" style="background:#F5F5DC;border:1px solid #ccc;" onclick="selectHorseColor(this)"></div>
+          <div class="swatch" data-color="#2C2C2C" style="background:#2C2C2C;" onclick="selectHorseColor(this)"></div>
+          <div class="swatch" data-color="#C0C0C0" style="background:#C0C0C0;" onclick="selectHorseColor(this)"></div>
+          <div class="swatch" data-color="#CD853F" style="background:#CD853F;" onclick="selectHorseColor(this)"></div>
+          <div class="swatch" data-color="#8B0000" style="background:#8B0000;" onclick="selectHorseColor(this)"></div>
+        </div>
+      </div>
+      <div class="horse-preview-wrap mt-12">
+        <div class="horse-preview-box" id="horse-preview-box"><span class="chibi-horse" id="horse-preview-emoji">🐎</span></div>
+        <div style="font-size:12px;color:#888;">Preview</div>
+      </div>
+      <div class="mt-20"><button class="btn btn-primary" onclick="doRegister()">Enter the Derby</button></div>
+    </div>
+  </div>
+
+  <!-- MAIN GAME -->
+  <div id="screen-game" class="hidden">
+    <div class="user-bar">
+      <div class="user-bar-info">
+        <img id="ub-avatar" class="user-avatar-circle" src="" alt="avatar">
+        <div>
+          <div class="user-detail-name" id="ub-name"></div>
+          <div class="user-detail-sub" id="ub-sub"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="admin-nav-btn" class="hidden"><button class="btn btn-sm btn-outline" onclick="showAdmin()">Admin Panel</button></span>
+        <button class="btn btn-sm btn-outline" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="game-status-banner" class="hidden alert" style="margin-bottom:16px;text-align:center;font-weight:700;"></div>
+
+    <div class="tabs" id="game-tabs">
+      <button class="tab-btn active" onclick="showGameTab('race')">🏇 Race Track</button>
+      <button class="tab-btn" onclick="showGameTab('leaderboard')">🏆 Leaderboard</button>
+      <button class="tab-btn" onclick="showGameTab('power')">⚡ Power-Up</button>
+    </div>
+
+    <!-- RACE TAB -->
+    <div id="tab-race" class="panel">
+      <h2>Today's Race</h2>
+      <div class="chips-row" id="race-rules-info"></div>
+      <div class="dice-area">
+        <div id="dice-display" class="dice-display"></div>
+        <div id="roll-result-area" class="hidden">
+          <div class="roll-formula" id="roll-formula-text"></div>
+          <div class="distance-gained" id="roll-distance-text"></div>
+        </div>
+        <div id="bonus-roll-banner" class="bonus-roll-banner hidden">
+          <div class="bonus-roll-text">🎰 All dice match — Bonus Roll Unlocked!</div>
+          <div style="font-size:13px;color:#666;margin-top:4px;">Extra distance will be added to your total!</div>
+        </div>
+        <div id="already-rolled-msg" class="hidden alert alert-ok"></div>
+        <div class="mt-8">
+          <button class="btn btn-gold" id="roll-btn" onclick="rollDice()">🎲 Roll the Dice!</button>
+        </div>
+      </div>
+      <hr class="section-divider">
+      <div class="track-wrap">
+        <div class="track-title">🏁 Churchill Downs — Live Track</div>
+        <div id="race-lanes"></div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD TAB -->
+    <div id="tab-leaderboard" class="panel hidden">
+      <h2>Top 10 Racers <span class="badge-live">LIVE</span></h2>
+      <ul class="leaderboard-list" id="leaderboard-list"><li class="no-players">No racers yet. Be the first!</li></ul>
+    </div>
+
+    <!-- POWER-UP TAB -->
+    <div id="tab-power" class="panel hidden">
+      <h2>⚡ Speed Boost</h2>
+      <div id="power-content"></div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="tab-admin" class="panel hidden">
+      <h2>Admin Panel <span class="admin-badge">Admin</span></h2>
+
+      <div class="admin-section">
+        <h4>📅 Game Schedule</h4>
+        <div class="form-row">
+          <div class="form-group"><label>Start Date &amp; Time</label><input type="datetime-local" id="admin-start-dt"></div>
+          <div class="form-group"><label>End Date &amp; Time</label><input type="datetime-local" id="admin-end-dt"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <span style="font-size:13px;color:#555;">Status:</span>
+          <span id="admin-status-indicator" class="game-status-badge">—</span>
+          <button class="btn btn-sm btn-green" onclick="adminForceStart()">Force Start</button>
+          <button class="btn btn-sm btn-primary" onclick="adminForceStop()">Force Stop</button>
+          <button class="btn btn-sm btn-outline" onclick="adminClearForce()">Use Schedule</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4>🎲 Dice Configuration</h4>
+        <div class="form-group"><label>Number of Dice (1–6)</label><input type="number" id="admin-num-dice" min="1" max="6" value="2" style="width:100px;"></div>
+      </div>
+
+      <div class="admin-section">
+        <h4>📐 Scoring Rule</h4>
+        <div class="rule-chips" id="rule-chips">
+          <div class="rule-chip active" data-rule="sum" onclick="selectRule(this)">Sum of Dice</div>
+          <div class="rule-chip" data-rule="multiply" onclick="selectRule(this)">Multiply All</div>
+          <div class="rule-chip" data-rule="max" onclick="selectRule(this)">Highest Die</div>
+          <div class="rule-chip" data-rule="min" onclick="selectRule(this)">Lowest Die</div>
+          <div class="rule-chip" data-rule="sum_x2" onclick="selectRule(this)">Sum × 2</div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4>🏁 Race Length</h4>
+        <div class="form-group"><label>Furlongs to Win</label><input type="number" id="admin-race-length" min="20" max="500" value="100" style="width:120px;"></div>
+      </div>
+
+      <div class="admin-section">
+        <h4>🎲 Roll Dice for a Player</h4>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="admin-roll-player" style="flex:1;min-width:160px;padding:9px 12px;border:1.5px solid rgba(92,51,23,.3);border-radius:8px;font-size:14px;background:#fff;color:var(--derby-dark);"></select>
+          <button class="btn btn-sm btn-gold" onclick="adminRollForPlayer()">🎲 Roll for Player</button>
+        </div>
+        <div id="admin-roll-result" style="font-size:13px;color:var(--derby-green);margin-top:8px;font-weight:700;min-height:20px;"></div>
+      </div>
+
+      <div class="admin-section">
+        <h4>👥 All Players</h4>
+        <div id="admin-player-list"></div>
+      </div>
+
+      <!-- Add User Section -->
+      <div class="admin-section">
+        <h4>➕ Add New User</h4>
+        <div class="add-user-form">
+          <div class="form-row">
+            <div class="form-group"><label>Username</label><input type="text" id="add-user-username" placeholder="Unique username"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="add-user-password" placeholder="Choose password"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Jockey Name</label><input type="text" id="add-user-jockey" placeholder="e.g. Wild Rose"></div>
+            <div class="form-group"><label>Horse Name</label><input type="text" id="add-user-horse" placeholder="e.g. Thunder"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Horse Emoji</label>
+              <select id="add-user-horse-emoji">
+                <option value="🐎">Bay Thoroughbred 🐎</option>
+                <option value="🦄">White Stallion 🦄</option>
+                <option value="🐴">Chestnut Mare 🐴</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Horse Color</label>
+              <input type="color" id="add-user-horse-color" value="#8B4513" style="height:42px;cursor:pointer;">
+            </div>
+          </div>
+          <button class="btn btn-sm btn-green" onclick="adminAddUser()">➕ Add User</button>
+          <span id="add-user-msg" style="margin-left:10px;font-size:13px;"></span>
+        </div>
+      </div>
+
+      <!-- Remove User Section -->
+      <div class="admin-section">
+        <h4>🗑️ Remove User</h4>
+        <div id="admin-user-mgmt-list"></div>
+      </div>
+
+      <div class="admin-section">
+        <h4>🔄 Reset Race</h4>
+        <p style="font-size:13px;color:#666;margin-bottom:10px;">Reset all distances to zero and clear rolls.</p>
+        <button class="btn btn-sm btn-primary" onclick="adminResetRace()">Reset All Progress</button>
+      </div>
+
+      <div class="mt-20" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-gold" onclick="saveAdminSettings()">Save Settings</button>
+        <span id="admin-save-msg" class="hidden" style="font-size:13px;color:#2a7a2a;">✓ Saved!</span>
+        <button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="backToGame()">← Back to Game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIDE OVERLAY -->
+<div id="ride-overlay">
+  <div id="ride-stars"></div>
+  <div class="ride-cloud" style="width:120px;height:30px;top:15%;animation-duration:12s;"></div>
+  <div class="ride-cloud" style="width:80px;height:20px;top:22%;animation-duration:9s;animation-delay:-4s;"></div>
+  <div class="ride-cloud" style="width:160px;height:35px;top:8%;animation-duration:15s;animation-delay:-7s;"></div>
+  <div id="speed-lines"></div>
+  <div class="ride-counter">
+    <div class="ride-counter-label">Distance Gained</div>
+    <div class="ride-counter-number" id="ride-dist-num">0</div>
+    <div class="ride-counter-unit">Furlongs</div>
+  </div>
+  <div class="ride-banner">
+    <div class="ride-banner-name" id="ride-horse-name"></div>
+    <div class="ride-banner-jockey" id="ride-jockey-name"></div>
+  </div>
+  <div class="ride-ground">
+    <div class="ground-lines" id="ground-lines"></div>
+    <div id="dust-container"></div>
+  </div>
+  <div class="ride-scene" id="ride-scene-actor"></div>
+</div>
+
+<script>
+// =========================================================
+// DB
+// =========================================================
+const DB = {
+  get users(){return JSON.parse(localStorage.getItem('derby_users')||'{}');},
+  setUsers(u){localStorage.setItem('derby_users',JSON.stringify(u));},
+  get session(){return localStorage.getItem('derby_session')||null;},
+  setSession(u){u?localStorage.setItem('derby_session',u):localStorage.removeItem('derby_session');},
+  get settings(){
+    return JSON.parse(localStorage.getItem('derby_settings')||JSON.stringify({numDice:2,rule:'sum',raceLength:100,startDt:'',endDt:'',forceStatus:''}));
+  },
+  setSettings(s){localStorage.setItem('derby_settings',JSON.stringify(s));},
+  getUser(u){return this.users[u]||null;},
+  saveUser(u,d){const a=this.users;a[u]=d;this.setUsers(a);},
+  getTodayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+};
+
+(function seedAdmin(){
+  const u=DB.users;
+  if(!u['admin']){
+    u['admin']={username:'admin',password:'admin123',isAdmin:true,jockey:{name:'The Commissioner',color:'red'},horse:{name:'Official',emoji:'🐎',color:'#8B4513'},distance:0,rolls:{},pendingBoost:0,photo:''};
+    DB.setUsers(u);
+  }
+})();
+
+// =========================================================
+// STATE
+// =========================================================
+let currentUser=null, selectedHorseColor='#8B4513', regPhotoDataUrl='', pendingBonusRoll=false, prevLbOrder=[];
+
+// =========================================================
+// GAME STATUS
+// =========================================================
+function getGameStatus(){
+  const s=DB.settings;
+  if(s.forceStatus==='active') return 'active';
+  if(s.forceStatus==='stopped') return 'stopped';
+  const now=Date.now();
+  if(s.startDt&&s.endDt){
+    const st=new Date(s.startDt).getTime(),en=new Date(s.endDt).getTime();
+    if(now<st) return 'scheduled';
+    if(now>=st&&now<=en) return 'active';
+    if(now>en) return 'ended';
+  }
+  if(s.startDt&&!s.endDt){return Date.now()>=new Date(s.startDt).getTime()?'active':'scheduled';}
+  return 'active';
+}
+
+function updateGameStatusBanner(){
+  const status=getGameStatus();
+  const banner=document.getElementById('game-status-banner');
+  const rb=document.getElementById('roll-btn');
+  if(!banner) return;
+  const cfg={
+    scheduled:{msg:'⏳ The race hasn\'t started yet — check back later!',cls:'alert-warn'},
+    ended:{msg:'🏁 The race has ended! Final standings are locked.',cls:'alert-err'},
+    stopped:{msg:'🛑 The race is paused by the admin.',cls:'alert-warn'}
+  };
+  if(cfg[status]){
+    banner.textContent=cfg[status].msg;
+    banner.className=`alert ${cfg[status].cls}`;
+    banner.classList.remove('hidden');
+    if(rb&&!pendingBonusRoll) rb.disabled=true;
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+// =========================================================
+// AUTH
+// =========================================================
+function switchAuthTab(tab){
+  document.querySelectorAll('#auth-tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',(tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('auth-login').classList.toggle('hidden',tab!=='login');
+  document.getElementById('auth-register').classList.toggle('hidden',tab!=='register');
+}
+
+function showAlert(id,msg,type='err'){
+  const el=document.getElementById(id);
+  el.className=`alert alert-${type}`;el.textContent=msg;el.classList.remove('hidden');
+  setTimeout(()=>el.classList.add('hidden'),5000);
+}
+
+function handleRegPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const SIZE=200; canvas.width=SIZE; canvas.height=SIZE;
+      const ctx=canvas.getContext('2d');
+      const min=Math.min(img.width,img.height);
+      const sx=(img.width-min)/2, sy=(img.height-min)/2;
+      ctx.drawImage(img,sx,sy,min,min,0,0,SIZE,SIZE);
+      regPhotoDataUrl=canvas.toDataURL('image/jpeg',0.72);
+      document.getElementById('reg-photo-preview').src=regPhotoDataUrl;
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value;
+  if(!u||!p){showAlert('login-alert','Please fill all fields');return;}
+  const user=DB.getUser(u);
+  if(!user||user.password!==p){showAlert('login-alert','Invalid username or password');return;}
+  DB.setSession(u); enterGame(user);
+}
+
+function doRegister(){
+  const u=document.getElementById('reg-user').value.trim().toLowerCase();
+  const p=document.getElementById('reg-pass').value;
+  const jName=document.getElementById('reg-jockey').value.trim();
+  const jColor=document.getElementById('reg-jockey-color').value;
+  const hName=document.getElementById('reg-horse').value.trim();
+  const hEmoji=document.getElementById('reg-horse-type').value;
+  if(!u||!p||!jName||!hName){showAlert('reg-alert','Please fill all fields');return;}
+  if(u.length<3){showAlert('reg-alert','Username must be at least 3 characters');return;}
+  if(DB.getUser(u)){showAlert('reg-alert','Username already taken');return;}
+  if(u==='admin'){showAlert('reg-alert','Reserved username');return;}
+  if(!regPhotoDataUrl){showAlert('reg-alert','Please upload your photo — it\'s required to register!');return;}
+  const userData={username:u,password:p,isAdmin:false,jockey:{name:jName,color:jColor},horse:{name:hName,emoji:hEmoji,color:selectedHorseColor},distance:0,rolls:{},pendingBoost:0,photo:regPhotoDataUrl};
+  DB.saveUser(u,userData); DB.setSession(u); enterGame(userData);
+}
+
+function doLogout(){
+  DB.setSession(null); currentUser=null; pendingBonusRoll=false;
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-auth').classList.remove('hidden');
+}
+
+// =========================================================
+// GAME ENTRY
+// =========================================================
+function enterGame(user){
+  currentUser=user;
+  document.getElementById('screen-auth').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  const av=document.getElementById('ub-avatar');
+  av.src=user.photo||''; av.style.display=user.photo?'block':'none';
+  document.getElementById('ub-name').textContent=`${user.horse.name} & ${user.jockey.name}`;
+  document.getElementById('ub-sub').textContent=user.username+(user.isAdmin?' — Admin':'');
+  document.getElementById('admin-nav-btn').classList.toggle('hidden',!user.isAdmin);
+  showGameTab('race');
+  refreshLeaderboard();
+}
+
+// =========================================================
+// TABS
+// =========================================================
+function showGameTab(tab){
+  document.getElementById('tab-admin').classList.add('hidden');
+  ['race','leaderboard','power'].forEach(t=>document.getElementById(`tab-${t}`).classList.toggle('hidden',t!==tab));
+  document.querySelectorAll('#game-tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',['race','leaderboard','power'][i]===tab));
+  if(tab==='leaderboard') refreshLeaderboard();
+  if(tab==='race') refreshRaceTab();
+  if(tab==='power') refreshPowerTab();
+}
+
+// =========================================================
+// ADMIN
+// =========================================================
+function showAdmin(){
+  ['race','leaderboard','power'].forEach(t=>document.getElementById(`tab-${t}`).classList.add('hidden'));
+  document.querySelectorAll('#game-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  const s=DB.settings;
+  document.getElementById('admin-num-dice').value=s.numDice;
+  document.getElementById('admin-race-length').value=s.raceLength;
+  document.getElementById('admin-start-dt').value=s.startDt||'';
+  document.getElementById('admin-end-dt').value=s.endDt||'';
+  document.querySelectorAll('.rule-chip').forEach(c=>c.classList.toggle('active',c.dataset.rule===s.rule));
+  updateAdminStatusIndicator();
+  renderAdminPlayerList();
+  renderAdminUserMgmtList();
+  populateAdminPlayerSelect();
+  document.getElementById('tab-admin').classList.remove('hidden');
+}
+
+function backToGame(){document.getElementById('tab-admin').classList.add('hidden');showGameTab('race');}
+function selectRule(el){document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+
+function updateAdminStatusIndicator(){
+  const status=getGameStatus();
+  const el=document.getElementById('admin-status-indicator');
+  const labels={active:'Active',scheduled:'Scheduled',ended:'Ended',stopped:'Stopped'};
+  const cls={active:'status-active',scheduled:'status-scheduled',ended:'status-inactive',stopped:'status-inactive'};
+  el.textContent=labels[status]||status; el.className='game-status-badge '+(cls[status]||'');
+}
+
+function adminForceStart(){const s=DB.settings;s.forceStatus='active';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
+function adminForceStop(){const s=DB.settings;s.forceStatus='stopped';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
+function adminClearForce(){const s=DB.settings;s.forceStatus='';DB.setSettings(s);updateAdminStatusIndicator();updateGameStatusBanner();}
+
+function saveAdminSettings(){
+  const numDice=Math.min(6,Math.max(1,parseInt(document.getElementById('admin-num-dice').value)||2));
+  const raceLength=Math.min(500,Math.max(20,parseInt(document.getElementById('admin-race-length').value)||100));
+  const rule=(document.querySelector('.rule-chip.active')||{dataset:{rule:'sum'}}).dataset.rule;
+  const startDt=document.getElementById('admin-start-dt').value;
+  const endDt=document.getElementById('admin-end-dt').value;
+  const s=DB.settings;
+  DB.setSettings({...s,numDice,rule,raceLength,startDt,endDt});
+  const msg=document.getElementById('admin-save-msg');
+  msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2500);
+  updateAdminStatusIndicator(); updateGameStatusBanner();
+}
+
+function adminResetRace(){
+  if(!confirm('Reset ALL player progress? This cannot be undone.')) return;
+  const users=DB.users;
+  Object.keys(users).forEach(k=>{users[k].distance=0;users[k].rolls={};users[k].pendingBoost=0;});
+  DB.setUsers(users); currentUser=DB.getUser(currentUser.username);
+  renderAdminPlayerList(); renderAdminUserMgmtList(); alert('Race reset! All distances cleared.');
+}
+
+function populateAdminPlayerSelect(){
+  const sel=document.getElementById('admin-roll-player');
+  const players=Object.values(DB.users).filter(u=>!u.isAdmin);
+  sel.innerHTML=players.length?players.map(u=>`<option value="${u.username}">${u.horse.emoji} ${u.horse.name} (@${u.username})</option>`).join(''):'<option>No players yet</option>';
+}
+
+// =========================================================
+// ADMIN ROLL FOR PLAYER - WITH ANIMATION
+// =========================================================
+function adminRollForPlayer(){
+  const uname=document.getElementById('admin-roll-player').value;
+  if(!uname || uname === 'No players yet') return;
+  const user=DB.getUser(uname); if(!user||user.isAdmin) return;
+  const s=DB.settings;
+  const todayKey=DB.getTodayKey();
+  const rolls=Array.from({length:s.numDice},()=>Math.ceil(Math.random()*6));
+  const boost=user.pendingBoost||0;
+  const dist=applyBoostAndCompute(rolls,s.rule,boost);
+  user.distance=(user.distance||0)+dist;
+  if(!user.rolls) user.rolls={};
+  user.rolls[todayKey]=(user.rolls[todayKey]||[]).concat(rolls);
+  user.pendingBoost=0;
+  DB.saveUser(uname,user);
+  
+  // Show text result
+  document.getElementById('admin-roll-result').textContent=`Rolled for ${user.horse.name}: ${formatFormula(rolls,s.rule)} → +${dist} furlongs${boost?` (incl. ${boost}% boost)`:''}`;
+  
+  // Play riding animation
+  playRidingAnimation(user,dist,()=>{
+    renderAdminPlayerList();
+    renderAdminUserMgmtList();
+    populateAdminPlayerSelect();
+    refreshLeaderboard();
+  });
+}
+
+// =========================================================
+// ADMIN ADD USER
+// =========================================================
+function adminAddUser(){
+  const username=document.getElementById('add-user-username').value.trim().toLowerCase();
+  const password=document.getElementById('add-user-password').value;
+  const jockeyName=document.getElementById('add-user-jockey').value.trim()||'Jockey';
+  const horseName=document.getElementById('add-user-horse').value.trim()||'Horse';
+  const horseEmoji=document.getElementById('add-user-horse-emoji').value;
+  const horseColor=document.getElementById('add-user-horse-color').value;
+  const msgEl=document.getElementById('add-user-msg');
+  
+  if(!username||!password){
+    msgEl.textContent='❌ Username and password required';
+    msgEl.style.color='#a00';
+    return;
+  }
+  if(username.length<3){
+    msgEl.textContent='❌ Username must be 3+ characters';
+    msgEl.style.color='#a00';
+    return;
+  }
+  if(DB.getUser(username)){
+    msgEl.textContent='❌ Username already exists';
+    msgEl.style.color='#a00';
+    return;
+  }
+  if(username==='admin'||username==='humana_derby'){
+    msgEl.textContent='❌ Reserved username';
+    msgEl.style.color='#a00';
+    return;
+  }
+  
+  const userData={
+    username:username,
+    password:password,
+    isAdmin:false,
+    jockey:{name:jockeyName,color:'red'},
+    horse:{name:horseName,emoji:horseEmoji,color:horseColor},
+    distance:0,
+    rolls:{},
+    pendingBoost:0,
+    photo:''
+  };
+  
+  DB.saveUser(username,userData);
+  
+  msgEl.textContent='✓ User added!';
+  msgEl.style.color='#1a6b1a';
+  
+  // Clear form
+  document.getElementById('add-user-username').value='';
+  document.getElementById('add-user-password').value='';
+  document.getElementById('add-user-jockey').value='';
+  document.getElementById('add-user-horse').value='';
+  
+  // Refresh lists
+  renderAdminUserMgmtList();
+  populateAdminPlayerSelect();
+  renderAdminPlayerList();
+  
+  setTimeout(()=>{msgEl.textContent='';},3000);
+}
+
+// =========================================================
+// ADMIN REMOVE USER
+// =========================================================
+function adminRemoveUser(username){
+  const user=DB.getUser(username);
+  if(!user) return;
+  if(!confirm(`Remove user "${username}" (${user.horse.name})?\n\nThis will delete all their progress!`)) return;
+  
+  const users=DB.users;
+  delete users[username];
+  DB.setUsers(users);
+  
+  renderAdminUserMgmtList();
+  renderAdminPlayerList();
+  populateAdminPlayerSelect();
+  refreshLeaderboard();
+}
+
+// =========================================================
+// RENDER USER MANAGEMENT LIST
+// =========================================================
+function renderAdminUserMgmtList(){
+  const users=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const container=document.getElementById('admin-user-mgmt-list');
+  
+  if(!users.length){
+    container.innerHTML='<em style="color:#999">No players yet.</em>';
+    return;
+  }
+  
+  container.innerHTML=users.map(u=>{
+    const avatarEl=u.photo?`<img class="admin-player-avatar" src="${u.photo}">`:`<div class="admin-player-avatar" style="background:rgba(200,151,42,.2);display:flex;align-items:center;justify-content:center;font-size:14px;">${u.horse.emoji}</div>`;
+    const todayKey=DB.getTodayKey();
+    const rolledToday=!!(u.rolls&&u.rolls[todayKey]);
+    return `<div class="user-mgmt-row">
+      ${avatarEl}
+      <div class="user-mgmt-info">
+        <div class="user-mgmt-name">${u.horse.emoji} ${u.horse.name} <span style="color:#999;font-weight:400;">(@${u.username})</span></div>
+        <div class="user-mgmt-sub">${u.jockey.name} • ${u.distance||0}f • ${rolledToday?'✅ Rolled today':'⏳ Not rolled'}</div>
+      </div>
+      <div class="user-mgmt-actions">
+        <button class="btn btn-sm btn-outline" onclick="adminRollForUserDirect('${u.username}')">🎲 Roll</button>
+        <button class="btn btn-sm btn-danger" onclick="adminRemoveUser('${u.username}')">🗑️ Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function adminRollForUserDirect(username){
+  const sel=document.getElementById('admin-roll-player');
+  sel.value=username;
+  adminRollForPlayer();
+}
+
+function renderAdminPlayerList(){
+  const list=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const container=document.getElementById('admin-player-list');
+  if(!list.length){
+    container.innerHTML='<em style="color:#999">No players yet.</em>';
+    return;
+  }
+  container.innerHTML=list.map(u=>{
+    const ph=u.photo?`<img class="admin-player-avatar" src="${u.photo}">`:`<div class="admin-player-avatar" style="background:rgba(200,151,42,.2);display:flex;align-items:center;justify-content:center;font-size:14px;">${u.horse.emoji}</div>`;
+    return `<div class="admin-player-row">${ph}<span style="flex:1;font-size:13px;"><b>${u.horse.name}</b> <span style="color:#999">@${u.username}</span></span><span style="color:var(--derby-red);font-weight:700;font-size:13px;">${u.distance||0}f</span>${u.pendingBoost?`<span class="boost-badge">⚡${u.pendingBoost}%</span>`:''}</div>`;
+  }).join('');
+}
+
+// =========================================================
+// DICE HELPERS
+// =========================================================
+function getDiceEmoji(v){return['','⚀','⚁','⚂','⚃','⚄','⚅'][v]||'🎲';}
+
+function computeRaw(rolls,rule){
+  if(rule==='sum') return rolls.reduce((a,b)=>a+b,0);
+  if(rule==='multiply') return rolls.reduce((a,b)=>a*b,1);
+  if(rule==='max') return Math.max(...rolls);
+  if(rule==='min') return Math.min(...rolls);
+  if(rule==='sum_x2') return rolls.reduce((a,b)=>a+b,0)*2;
+  return rolls.reduce((a,b)=>a+b,0);
+}
+
+function applyBoostAndCompute(rolls,rule,boostPct){
+  return Math.round(computeRaw(rolls,rule)*(1+boostPct/100));
+}
+
+function formatFormula(rolls,rule){
+  if(rule==='multiply') return rolls.join(' × ');
+  if(rule==='max') return `max(${rolls.join(', ')})`;
+  if(rule==='min') return `min(${rolls.join(', ')})`;
+  if(rule==='sum_x2') return `(${rolls.join(' + ')}) × 2`;
+  return rolls.join(' + ');
+}
+
+function ruleLabel(r){return{sum:'Sum',multiply:'Multiply',max:'Highest Die',min:'Lowest Die',sum_x2:'Sum×2'}[r]||r;}
+function allSame(rolls){return rolls.length>1&&rolls.every(r=>r===rolls[0]);}
+
+// =========================================================
+// RACE TAB
+// =========================================================
+function refreshRaceTab(){
+  if(!currentUser) return;
+  const s=DB.settings;
+  const user=DB.getUser(currentUser.username); currentUser=user;
+  document.getElementById('race-rules-info').innerHTML=
+    `<span class="info-chip">🎲 ${s.numDice} Dice</span>
+     <span class="info-chip">📐 ${ruleLabel(s.rule)}</span>
+     <span class="info-chip">🏁 ${s.raceLength} Furlongs</span>
+     ${user.pendingBoost?`<span class="info-chip" style="border-color:var(--derby-green);color:var(--derby-green);">⚡ +${user.pendingBoost}% Boost active!</span>`:''}`;
+  updateGameStatusBanner();
+  const status=getGameStatus();
+  const todayKey=DB.getTodayKey();
+  const rolledToday=!!(user.rolls&&user.rolls[todayKey]);
+  const rb=document.getElementById('roll-btn');
+  const arm=document.getElementById('already-rolled-msg');
+  document.getElementById('roll-result-area').classList.add('hidden');
+  document.getElementById('bonus-roll-banner').classList.add('hidden');
+  if(status!=='active'){
+    rb.disabled=true; arm.classList.add('hidden');
+  } else if(rolledToday&&!pendingBonusRoll){
+    rb.disabled=true;
+    arm.textContent=`You rolled today! Dice: ${user.rolls[todayKey].map(getDiceEmoji).join('')} — Total: ${user.distance}f. Come back tomorrow!`;
+    arm.classList.remove('hidden');
+  } else {
+    rb.disabled=false; arm.classList.add('hidden');
+    rb.textContent=pendingBonusRoll?'🎰 Claim Bonus Roll!':'🎲 Roll the Dice!';
+  }
+  setupDiceDisplay(s.numDice,null);
+  renderTrack();
+}
+
+function setupDiceDisplay(n,vals){
+  const c=document.getElementById('dice-display'); c.innerHTML='';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='die';d.id=`die-${i}`;d.textContent=vals?getDiceEmoji(vals[i]):'🎲';c.appendChild(d);}
+}
+
+function rollDice(){
+  const s=DB.settings;
+  if(getGameStatus()!=='active') return;
+  const todayKey=DB.getTodayKey();
+  const user=DB.getUser(currentUser.username);
+  if(user.rolls&&user.rolls[todayKey]&&!pendingBonusRoll) return;
+  document.getElementById('roll-btn').disabled=true;
+  document.getElementById('bonus-roll-banner').classList.add('hidden');
+  for(let i=0;i<s.numDice;i++) document.getElementById(`die-${i}`).classList.add('rolling');
+  let ticks=0;
+  const iv=setInterval(()=>{
+    ticks++;
+    for(let i=0;i<s.numDice;i++) document.getElementById(`die-${i}`).textContent=getDiceEmoji(Math.ceil(Math.random()*6));
+    if(ticks>=15){
+      clearInterval(iv);
+      const rolls=Array.from({length:s.numDice},()=>Math.ceil(Math.random()*6));
+      for(let i=0;i<s.numDice;i++){document.getElementById(`die-${i}`).classList.remove('rolling');document.getElementById(`die-${i}`).textContent=getDiceEmoji(rolls[i]);}
+      const boost=pendingBonusRoll?0:(user.pendingBoost||0);
+      const raw=computeRaw(rolls,s.rule);
+      const dist=applyBoostAndCompute(rolls,s.rule,boost);
+      const boostNote=boost?` (+${boost}% boost = +${dist-raw} bonus)`:'';
+      document.getElementById('roll-formula-text').textContent=`${formatFormula(rolls,s.rule)} = ${raw}${boostNote}`;
+      document.getElementById('roll-distance-text').textContent=`+${dist} furlongs${pendingBonusRoll?' (Bonus Roll!)':''}!`;
+      document.getElementById('roll-result-area').classList.remove('hidden');
+      user.distance=(user.distance||0)+dist;
+      if(!user.rolls) user.rolls={};
+      user.rolls[todayKey]=[...(user.rolls[todayKey]||[]),...rolls];
+      if(!pendingBonusRoll) user.pendingBoost=0;
+      DB.saveUser(user.username,user); currentUser=user;
+      pendingBonusRoll=false;
+      const isBonus=allSame(rolls)&&s.numDice>1;
+      playRidingAnimation(user,dist,()=>{
+        document.getElementById('roll-result-area').classList.remove('hidden');
+        if(isBonus){
+          pendingBonusRoll=true;
+          document.getElementById('bonus-roll-banner').classList.remove('hidden');
+          const rb=document.getElementById('roll-btn');
+          rb.disabled=false; rb.textContent='🎰 Claim Bonus Roll!';
+        } else {
+          document.getElementById('roll-btn').disabled=true;
+          document.getElementById('roll-btn').textContent='🎲 Roll the Dice!';
+          const arm=document.getElementById('already-rolled-msg');
+          arm.textContent=`Rolled! Total today: ${user.distance}f. Come back tomorrow!`;
+          arm.classList.remove('hidden');
+        }
+        renderTrack();
+      });
+    }
+  },80);
+}
+
+function renderTrack(){
+  const s=DB.settings;
+  const allPlayers=Object.values(DB.users).filter(u=>!u.isAdmin);
+  const c=document.getElementById('race-lanes');
+  if(!allPlayers.length){c.innerHTML='<div style="color:rgba(245,240,232,.5);text-align:center;padding:20px;font-size:14px;">No racers yet!</div>';return;}
+  const maxDist=Math.max(s.raceLength,...allPlayers.map(u=>u.distance||0));
+  c.innerHTML=allPlayers.sort((a,b)=>(b.distance||0)-(a.distance||0)).map(u=>{
+    const dist=u.distance||0;
+    const pct=Math.min(100,(dist/maxDist)*100);
+    const isMe=currentUser&&u.username===currentUser.username;
+    const avatarEl=u.photo?`<img class="lane-avatar" src="${u.photo}" alt="">`:`<span style="font-size:20px;line-height:1;">${u.horse.emoji}</span>`;
+    return `<div class="track-lane">
+      <div class="lane-label" style="color:rgba(245,240,232,${isMe?'1':'.55'});font-weight:${isMe?'700':'400'}">${u.horse.name.substring(0,6)}</div>
+      <div class="lane-track">
+        <div class="lane-progress" style="width:${Math.max(5,pct)}%;background:${u.horse.color||'#8B4513'};">${avatarEl}</div>
+        <div class="lane-dist">${dist}f</div>
+        <div class="finish-line"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// =========================================================
+// POWER-UP
+// =========================================================
+const POWERUPS=[
+  {mult:0,   label:'No Boost',    prob:30, color:'#999'},
+  {mult:25,  label:'+25% Speed',  prob:25, color:'#4caf50'},
+  {mult:50,  label:'+50% Speed',  prob:20, color:'#2196f3'},
+  {mult:75,  label:'+75% Speed',  prob:15, color:'#9c27b0'},
+  {mult:100, label:'+100% Speed', prob:7,  color:'#f44336'},
+  {mult:200, label:'+200% Speed', prob:3,  color:'#ff9800'},
+];
+
+function refreshPowerTab(){
+  if(!currentUser) return;
+  const user=DB.getUser(currentUser.username);
+  const hasBoost=user.pendingBoost>0;
+  const canAfford=user.distance>=3;
+  document.getElementById('power-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:rgba(200,151,42,.1);border:1px solid rgba(200,151,42,.3);border-radius:10px;padding:14px;">
+      <span style="font-size:40px;">${user.horse.emoji}</span>
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--derby-dark);">${user.horse.name}</div>
+        <div style="font-size:13px;color:var(--derby-brown);">Current distance: <b>${user.distance||0} furlongs</b></div>
+        ${hasBoost?`<div style="font-size:13px;color:var(--derby-green);font-weight:700;margin-top:4px;">⚡ Boost ready: +${user.pendingBoost}% on your next roll!</div>`:''}
+      </div>
+    </div>
+    <h3>Spin the Wheel</h3>
+    <p style="font-size:13px;color:#666;margin-bottom:14px;">Spend <b>3 furlongs</b> to spin — the boost applies to your <b>next day's</b> roll.</p>
+    ${hasBoost?`<div class="alert alert-ok" style="margin-bottom:14px;">⚡ You have a +${user.pendingBoost}% boost waiting for your next roll!</div>`:''}
+    <div class="powerup-grid" id="pu-grid">
+      ${POWERUPS.map((p,i)=>`<div class="powerup-card${hasBoost?' disabled':''}" id="pu-card-${i}">
+        <div class="powerup-mult" style="color:${p.color};">${p.mult===0?'✗':`+${p.mult}%`}</div>
+        <div class="powerup-label">${p.label}</div>
+        <div class="powerup-prob">${p.prob}% chance</div>
+      </div>`).join('')}
+    </div>
+    <div style="text-align:center;">
+      ${!hasBoost&&canAfford?`<button class="btn btn-gold" onclick="spinWheel()">🎡 Spend 3 Furlongs & Spin!</button>`:''}
+      ${!canAfford&&!hasBoost?`<div class="alert alert-warn" style="display:inline-block;">You need at least 3 furlongs to spin. Keep racing!</div>`:''}
+      <div id="spin-result-area" style="margin-top:12px;"></div>
+    </div>`;
+}
+
+function spinWheel(){
+  const user=DB.getUser(currentUser.username);
+  if(user.distance<3){showAlert && alert('Not enough furlongs!');return;}
+  document.querySelectorAll('.powerup-card').forEach(c=>c.classList.add('disabled'));
+  let ticks=0,curr=0;
+  const iv=setInterval(()=>{
+    ticks++;
+    document.querySelectorAll('.powerup-card').forEach(c=>c.classList.remove('selected'));
+    curr=(curr+1)%POWERUPS.length;
+    const cards=document.querySelectorAll('.powerup-card');
+    if(cards[curr]) cards[curr].classList.add('selected');
+    if(ticks>=20){
+      clearInterval(iv);
+      const rand=Math.random()*100; let acc=0,result=POWERUPS[0];
+      for(const p of POWERUPS){acc+=p.prob;if(rand<acc){result=p;break;}}
+      document.querySelectorAll('.powerup-card').forEach((c,i)=>{c.classList.remove('selected');if(POWERUPS[i].mult===result.mult) c.classList.add('selected');});
+      user.distance-=3; user.pendingBoost=result.mult;
+      DB.saveUser(user.username,user); currentUser=user;
+      document.getElementById('spin-result-area').innerHTML=`<div class="spin-result" style="border:2px solid ${result.color};color:${result.color};background:rgba(0,0,0,.04);">
+        ${result.mult===0?'😔 No boost this time — try again tomorrow!':'🎉 +'+result.mult+'% boost on your next roll!'}
+      </div>`;
+      setTimeout(refreshPowerTab,2200);
+      refreshRaceTab();
+    }
+  },80);
+}
+
+// =========================================================
+// LEADERBOARD
+// =========================================================
+function refreshLeaderboard(){
+  const sorted=Object.values(DB.users).filter(u=>!u.isAdmin).sort((a,b)=>(b.distance||0)-(a.distance||0)).slice(0,10);
+  const medals=['🥇','🥈','🥉'];
+  const list=document.getElementById('leaderboard-list');
+  const s=DB.settings;
+  const maxDist=Math.max(1,s.raceLength,...sorted.map(u=>u.distance||0));
+  if(!sorted.length){list.innerHTML='<li class="no-players">No racers yet. Register and start rolling!</li>';prevLbOrder=[];return;}
+  const prevRankMap={};prevLbOrder.forEach((u,i)=>{prevRankMap[u]=i;});
+  list.innerHTML=sorted.map((u,i)=>{
+    const isMe=currentUser&&u.username===currentUser.username;
+    const dist=u.distance||0;
+    const pct=Math.min(100,(dist/maxDist)*100);
+    const rankImproved=prevRankMap[u.username]!==undefined&&i<prevRankMap[u.username];
+    const isGallop=isMe||i===0;
+    const avatarEl=u.photo?`<img class="lb-avatar" src="${u.photo}">`:`<div class="lb-avatar-placeholder">${u.horse.emoji}</div>`;
+    return `<li class="leaderboard-item${isMe?' your-horse-highlight':''}" style="animation-delay:${i*70}ms;">
+      <div class="rank-badge">${medals[i]||(i+1)}</div>
+      ${avatarEl}
+      <div class="lb-horse-emoji ${isGallop?'lb-horse-gallop':''}">${u.horse.emoji}</div>
+      <div class="lb-info">
+        <div class="lb-name">${u.horse.name}${isMe?' <span style="font-size:11px;color:var(--derby-gold);">(You)</span>':''}${rankImproved?' <span style="font-size:10px;color:#2a7a2a;">▲ up!</span>':''}</div>
+        <div class="lb-jockey">${u.jockey.name} · @${u.username}${u.pendingBoost?` <span class="boost-badge">⚡${u.pendingBoost}%</span>`:''}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lb-dist">${dist}f</div>
+        <div style="font-size:10px;color:#aaa;">${Math.round(pct)}%</div>
+      </div>
+      <div class="lb-shine"></div>
+      <div class="lb-progress-bar" style="width:${pct}%;"></div>
+    </li>`;
+  }).join('');
+  prevLbOrder=sorted.map(u=>u.username);
+}
+
+// =========================================================
+// RIDING ANIMATION
+// =========================================================
+function buildRideOverlay(){
+  const stars=document.getElementById('ride-stars'); stars.innerHTML='';
+  for(let i=0;i<60;i++){const s=document.createElement('div');s.className='ride-star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*65}%;opacity:${.3+Math.random()*.7};width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;`;stars.appendChild(s);}
+  document.getElementById('ground-lines').innerHTML=Array(30).fill('<div class="ground-line"></div>').join('');
+  const sl=document.getElementById('speed-lines'); sl.innerHTML='';
+  for(let i=0;i<12;i++){const l=document.createElement('div');l.className='speed-line';l.style.cssText=`top:${35+Math.random()*30}%;right:${Math.random()*20}%;width:${40+Math.random()*120}px;animation-duration:${.3+Math.random()*.4}s;animation-delay:${Math.random()*.5}s;`;sl.appendChild(l);}
+}
+
+function spawnDust(){
+  const c=document.getElementById('dust-container'); if(!c) return;
+  for(let i=0;i<3;i++){const d=document.createElement('div');const sz=10+Math.random()*20;d.className='dust-puff';d.style.cssText=`width:${sz}px;height:${sz}px;left:${12+Math.random()*18}%;bottom:${Math.random()*20}px;animation-delay:${Math.random()*.2}s;`;c.appendChild(d);setTimeout(()=>d.remove(),900);}
+}
+
+function animateCounter(target,duration){
+  const el=document.getElementById('ride-dist-num');
+  const start=Date.now();
+  (function tick(){
+    const p=Math.min(1,(Date.now()-start)/duration);
+    el.textContent=Math.round((1-Math.pow(1-p,3))*target);
+    if(p<1) requestAnimationFrame(tick); else el.textContent=target;
+  })();
+}
+
+function playRidingAnimation(user,dist,onComplete){
+  buildRideOverlay();
+  document.getElementById('ride-horse-name').textContent=user.horse.name;
+  document.getElementById('ride-jockey-name').textContent=`Ridden by ${user.jockey.name}`;
+  const old=document.getElementById('ride-scene-actor');
+  const actor=document.createElement('div');
+  actor.className='ride-scene'; actor.id='ride-scene-actor';
+  actor.innerHTML=`<div class="ride-horse-stack">
+    ${user.photo?`<img class="ride-avatar-jockey" src="${user.photo}" alt="jockey">`:''}
+    <span class="ride-horse-emoji">${user.horse.emoji}</span>
+  </div>`;
+  old.parentNode.replaceChild(actor,old);
+  document.getElementById('ride-overlay').classList.add('active');
+  animateCounter(dist,2200);
+  const dustIv=setInterval(spawnDust,180);
+  setTimeout(()=>{clearInterval(dustIv);document.getElementById('ride-overlay').classList.remove('active');if(onComplete) onComplete();},3900);
+}
+
+// =========================================================
+// REGISTER HELPERS
+// =========================================================
+function selectHorseColor(el){
+  document.querySelectorAll('#horse-color-swatches .swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active'); selectedHorseColor=el.dataset.color;
+  document.getElementById('horse-preview-box').style.borderColor=selectedHorseColor;
+}
+function updateHorsePreview(){
+  document.getElementById('horse-preview-emoji').textContent=document.getElementById('reg-horse-type').value;
+}
+
+// =========================================================
+// AUTO-REFRESH (every 10s)
+// =========================================================
+setInterval(()=>{
+  if(!currentUser) return;
+  if(!document.getElementById('tab-leaderboard').classList.contains('hidden')) refreshLeaderboard();
+  if(!document.getElementById('tab-race').classList.contains('hidden')) renderTrack();
+  updateGameStatusBanner();
+},10000);
+
+// =========================================================
+// BOOT
+// =========================================================
+(function boot(){
+  const s=DB.session; if(s){const u=DB.getUser(s);if(u){enterGame(u);return;}}
+})();
+</script>
+</body>
+</html>
