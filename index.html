@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CQS Derby Horse Racing</title>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
@@ -12,7 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
 <style>
-  /* [All your existing CSS stays the same] */
   :root {
     --derby-green:#2d5016;--derby-gold:#c8972a;--derby-red:#8b1a1a;
     --derby-cream:#f5f0e8;--derby-brown:#5c3317;--derby-dark:#1a0f0a;
@@ -81,16 +80,30 @@
   .swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0;}
   .swatch.active,.swatch:hover{border-color:var(--derby-gold);transform:scale(1.15);}
 
+  /* UPDATED TRACK CSS */
   .track-wrap{background:var(--derby-dark);border-radius:12px;padding:20px 16px;overflow:hidden;border:2px solid rgba(200,151,42,.25);}
   .track-title{font-family:'Rye',serif;font-size:16px;color:var(--derby-gold);text-align:center;margin-bottom:16px;}
-  .track-lane{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .lane-label{width:44px;font-size:11px;color:rgba(245,240,232,.6);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .lane-track{flex:1;height:40px;background:var(--track-dirt);border-radius:20px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.2);}
+  .track-lane{display:grid;grid-template-columns:40px 1fr 160px;align-items:center;gap:10px;margin-bottom:10px;}
+  .lane-label{font-size:11px;color:rgba(245,240,232,.6);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lane-track{height:40px;background:var(--track-dirt);border-radius:20px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.2);}
   .lane-track::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.12);border-radius:20px 20px 0 0;}
-  .lane-progress{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:flex-end;padding-right:3px;min-width:44px;}
-  .lane-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8);flex-shrink:0;}
-  .lane-dist{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(245,240,232,.85);font-weight:700;white-space:nowrap;}
+  .lane-progress{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:flex-end;padding-right:3px;min-width:44px; position: relative;}
+  .lane-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8);flex-shrink:0; z-index: 3; position: relative;}
+  .lane-dist{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(245,240,232,.85);font-weight:700;white-space:nowrap; z-index: 3;}
   .finish-line{position:absolute;right:0;top:0;bottom:0;width:8px;background:repeating-linear-gradient(180deg,#fff 0,#fff 4px,#000 4px,#000 8px);opacity:.5;border-radius:0 20px 20px 0;}
+  
+  /* NEW CLASS FOR TEXT LABELS */
+  .lane-info-text {
+      font-size: 11px;
+      color: rgba(245,240,232,0.8);
+      line-height: 1.3;
+      text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+  }
+  .lane-info-name { font-weight: 700; color: #fff; display: block; }
+  .lane-info-jockey { font-size: 10px; color: rgba(245,240,232,0.5); display: block; }
 
   .dice-area{text-align:center;padding:20px 0;}
   .dice-display{display:flex;justify-content:center;gap:16px;margin:20px 0;flex-wrap:wrap;}
@@ -208,11 +221,55 @@
   .speed-line{position:absolute;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:speed-fly .3s linear infinite;}
   @keyframes speed-fly{from{transform:translateX(100vw);opacity:.8;}to{transform:translateX(-100px);opacity:0;}}
 
+  /* Global Lock Toggle Styles */
+  .global-lock-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.5);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+  .lock-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--derby-brown);
+    user-select: none;
+  }
+  .lock-toggle input { display: none; }
+  .lock-slider {
+    width: 34px;
+    height: 18px;
+    background-color: #ccc;
+    border-radius: 34px;
+    position: relative;
+    transition: .4s;
+  }
+  .lock-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+  }
+  input:checked + .lock-slider { background-color: var(--derby-red); }
+  input:checked + .lock-slider:before { transform: translateX(16px); }
+
   @media(max-width:600px){
     .panel{padding:20px 16px;}.form-row{grid-template-columns:1fr;}.tabs{flex-wrap:wrap;}
     .ride-counter-number{font-size:44px;}.ride-horse-emoji{font-size:52px;}.ride-avatar-jockey{width:36px;height:36px;top:-34px;}
     .powerup-grid{grid-template-columns:repeat(3,1fr);}
     .user-mgmt-row{flex-wrap:wrap;}.user-mgmt-actions{margin-top:8px;width:100%;justify-content:flex-end;}
+    .track-lane{grid-template-columns:30px 1fr 100px;} /* Adjust for mobile */
+    .lane-info-text{font-size:9px;}
   }
 </style>
 </head>
@@ -388,6 +445,16 @@
       <div class="admin-section">
         <h4>🎲 Dice Configuration</h4>
         <div class="form-group"><label>Number of Dice (1–6)</label><input type="number" id="admin-num-dice" min="1" max="6" value="2" style="width:100px;"></div>
+        
+        <!-- NEW GLOBAL LOCK TOGGLE -->
+        <div class="global-lock-control">
+          <span style="font-size:13px;font-weight:700;color:var(--derby-brown);">🔒 Global Lock (Prevent All Rolling)</span>
+          <label class="lock-toggle">
+            <input type="checkbox" id="admin-global-lock-toggle" onchange="toggleGlobalLock(this.checked)">
+            <span class="lock-slider"></span>
+            <span id="global-lock-label">Unlocked</span>
+          </label>
+        </div>
       </div>
 
       <div class="admin-section">
@@ -431,6 +498,16 @@
             <div class="form-group"><label>Jockey Name</label><input type="text" id="add-user-jockey" placeholder="e.g. Wild Rose"></div>
             <div class="form-group"><label>Horse Name</label><input type="text" id="add-user-horse" placeholder="e.g. Thunder"></div>
           </div>
+          
+          <hr class="section-divider">
+          <h3>Photo <span style="color:var(--derby-red);font-size:12px;font-family:'Lato',sans-serif;font-style:normal;">* Required</span></h3>
+          <div class="avatar-upload-area" onclick="document.getElementById('add-user-photo-input').click()">
+            <input type="file" id="add-user-photo-input" accept="image/*" onchange="handleAdminPhoto(this)">
+            <img id="add-user-photo-preview" class="avatar-preview-ring" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Ccircle cx='45' cy='45' r='45' fill='%23c8972a' opacity='.15'/%3E%3Ctext x='45' y='58' text-anchor='middle' font-size='42'%3E📷%3C/text%3E%3C/svg%3E" alt="Upload photo">
+            <div class="avatar-upload-hint">Click to choose photo</div>
+          </div>
+
+          <hr class="section-divider">
           <div class="form-row">
             <div class="form-group">
               <label>Horse Emoji</label>
@@ -549,7 +626,7 @@ const DB = {
   },
   async getSettings(){
     const snapshot = await db.ref('settings').once('value');
-    return snapshot.val() || {numDice:2,rule:'sum',raceLength:100,startDt:'',endDt:'',forceStatus:''};
+    return snapshot.val() || {numDice:2,rule:'sum',raceLength:100,startDt:'',endDt:'',forceStatus:'', globalLock: false};
   },
   async setSettings(s){
     await db.ref('settings').set(s);
@@ -566,7 +643,7 @@ const DB = {
   },
   onSettingsUpdate(callback){
     db.ref('settings').on('value', snapshot => {
-      callback(snapshot.val() || {numDice:2,rule:'sum',raceLength:100});
+      callback(snapshot.val() || {numDice:2,rule:'sum',raceLength:100, globalLock: false});
     });
   }
 };
@@ -575,6 +652,7 @@ const DB = {
 // STATE
 // =========================================================
 let currentUser=null, selectedHorseColor='#8B4513', regPhotoDataUrl='', pendingBonusRoll=false, prevLbOrder=[], allUsers={}, currentSettings={};
+let adminPhotoDataUrl = ''; // For admin add user form
 
 // =========================================================
 // INITIALIZATION
@@ -602,6 +680,10 @@ async function initGame(){
       updateGameStatusBanner();
       if(document.getElementById('tab-admin') && !document.getElementById('tab-admin').classList.contains('hidden')){
         updateAdminStatusIndicator();
+        // Update global lock toggle UI
+        const toggle = document.getElementById('admin-global-lock-toggle');
+        if(toggle) toggle.checked = !!settings.globalLock;
+        updateGlobalLockLabel(!!settings.globalLock);
       }
     });
     
@@ -626,7 +708,8 @@ async function initGame(){
         distance:0,
         rolls:{},
         pendingBoost:0,
-        photo:''
+        photo:'',
+        totalSpentOnSpins: 0
       });
     }
   } catch(error){
@@ -708,6 +791,26 @@ function handleRegPhoto(input){
   reader.readAsDataURL(file);
 }
 
+function handleAdminPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const SIZE=200; canvas.width=SIZE; canvas.height=SIZE;
+      const ctx=canvas.getContext('2d');
+      const min=Math.min(img.width,img.height);
+      const sx=(img.width-min)/2, sy=(img.height-min)/2;
+      ctx.drawImage(img,sx,sy,min,min,0,0,SIZE,SIZE);
+      adminPhotoDataUrl=canvas.toDataURL('image/jpeg',0.72);
+      document.getElementById('add-user-photo-preview').src=adminPhotoDataUrl;
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 async function doLogin(){
   const u=document.getElementById('login-user').value.trim().toLowerCase();
   const p=document.getElementById('login-pass').value;
@@ -730,7 +833,7 @@ async function doRegister(){
   if(await DB.getUser(u)){showAlert('reg-alert','Username already taken');return;}
   if(u==='admin'||u==='humana_derby'){showAlert('reg-alert','Reserved username');return;}
   if(!regPhotoDataUrl){showAlert('reg-alert','Please upload your photo — it\'s required to register!');return;}
-  const userData={username:u,password:p,isAdmin:false,jockey:{name:jName,color:jColor},horse:{name:hName,emoji:hEmoji,color:selectedHorseColor},distance:0,rolls:{},pendingBoost:0,photo:regPhotoDataUrl};
+  const userData={username:u,password:p,isAdmin:false,jockey:{name:jName,color:jColor},horse:{name:hName,emoji:hEmoji,color:selectedHorseColor},distance:0,rolls:{},pendingBoost:0,photo:regPhotoDataUrl, totalSpentOnSpins: 0};
   await DB.saveUser(u,userData);
   localStorage.setItem('current_user',JSON.stringify({username:u}));
   enterGame(userData);
@@ -857,26 +960,43 @@ async function adminResetRace(){
 function populateAdminPlayerSelect(){
   const sel=document.getElementById('admin-roll-player');
   const players=Object.values(allUsers).filter(u=>!u.isAdmin);
-  sel.innerHTML=players.length?players.map(u=>`<option value="${u.username}">${u.horse.emoji} ${u.horse.name} (@${u.username})</option>`).join(''):'<option>No players yet</option>';
+  const todayKey = DB.getTodayKey();
+  
+  sel.innerHTML=players.length?players.map(u=>{
+    const hasRolledToday = u.rolls && u.rolls[todayKey];
+    const isDisabled = hasRolledToday ? 'disabled' : '';
+    const style = hasRolledToday ? 'color:#999;' : '';
+    return `<option value="${u.username}" ${isDisabled} style="${style}">${u.horse.emoji} ${u.horse.name} (@${u.username}) ${hasRolledToday ? '— Rolled' : ''}</option>`;
+  }).join(''):'<option>No players yet</option>';
 }
 
 // =========================================================
-// ADMIN ROLL FOR PLAYER - WITH ANIMATION
+// ADMIN ROLL FOR PLAYER - WITH ANIMATION & LOCK LOGIC
 // =========================================================
 async function adminRollForPlayer(){
   const uname=document.getElementById('admin-roll-player').value;
   if(!uname || uname === 'No players yet') return;
   const user=await DB.getUser(uname);
   if(!user||user.isAdmin) return;
+  
   const s=currentSettings;
   const todayKey=DB.getTodayKey();
+  
+  // Check if already rolled today
+  if(user.rolls && user.rolls[todayKey] && user.rolls[todayKey].length >= s.numDice) {
+      document.getElementById('admin-roll-result').textContent = `❌ ${user.horse.name} has already rolled today!`;
+      document.getElementById('admin-roll-result').style.color = 'var(--derby-red)';
+      populateAdminPlayerSelect(); // Refresh to disable
+      return;
+  }
+
   const rolls=Array.from({length:s.numDice},()=>Math.ceil(Math.random()*6));
   const boost=user.pendingBoost||0;
   const dist=applyBoostAndCompute(rolls,s.rule,boost);
   user.distance=(user.distance||0)+dist;
   if(!user.rolls) user.rolls={};
   user.rolls[todayKey]=(user.rolls[todayKey]||[]).concat(rolls);
-  user.pendingBoost=0;
+  user.pendingBoost=0; // Consume boost
   await DB.saveUser(uname,user);
   
   document.getElementById('admin-roll-result').textContent=`Rolled for ${user.horse.name}: ${formatFormula(rolls,s.rule)} → +${dist} furlongs${boost?` (incl. ${boost}% boost)`:''}`;
@@ -886,6 +1006,13 @@ async function adminRollForPlayer(){
     renderAdminUserMgmtList();
     populateAdminPlayerSelect();
     refreshLeaderboard();
+    
+    // Check for bonus roll (all dice same)
+    if(allSame(rolls) && s.numDice > 1) {
+        document.getElementById('admin-roll-result').textContent += " 🎰 BONUS ROLL ALLOWED!";
+    } else {
+        // If not bonus, the select option will be disabled on next render of populateAdminPlayerSelect
+    }
   });
 }
 
@@ -921,6 +1048,11 @@ async function adminAddUser(){
     msgEl.style.color='#a00';
     return;
   }
+  if(!adminPhotoDataUrl){
+      msgEl.textContent='❌ Photo is required';
+      msgEl.style.color='#a00';
+      return;
+  }
   
   const userData={
     username:username,
@@ -931,7 +1063,8 @@ async function adminAddUser(){
     distance:0,
     rolls:{},
     pendingBoost:0,
-    photo:''
+    photo:adminPhotoDataUrl,
+    totalSpentOnSpins: 0
   };
   
   await DB.saveUser(username,userData);
@@ -943,6 +1076,9 @@ async function adminAddUser(){
   document.getElementById('add-user-password').value='';
   document.getElementById('add-user-jockey').value='';
   document.getElementById('add-user-horse').value='';
+  document.getElementById('add-user-photo-input').value = '';
+  adminPhotoDataUrl = '';
+  document.getElementById('add-user-photo-preview').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Ccircle cx='45' cy='45' r='45' fill='%23c8972a' opacity='.15'/%3E%3Ctext x='45' y='58' text-anchor='middle' font-size='42'%3E📷%3C/text%3E%3C/svg%3E";
   
   renderAdminUserMgmtList();
   populateAdminPlayerSelect();
@@ -968,6 +1104,22 @@ async function adminRemoveUser(username){
 }
 
 // =========================================================
+// ADMIN GLOBAL LOCK/UNLOCK
+// =========================================================
+async function toggleGlobalLock(isLocked){
+  currentSettings.globalLock = isLocked;
+  await DB.setSettings(currentSettings);
+  updateGlobalLockLabel(isLocked);
+  updateGameStatusBanner();
+  refreshRaceTab();
+}
+
+function updateGlobalLockLabel(isLocked){
+  const label = document.getElementById('global-lock-label');
+  if(label) label.textContent = isLocked ? 'Locked' : 'Unlocked';
+}
+
+// =========================================================
 // RENDER USER MANAGEMENT LIST
 // =========================================================
 function renderAdminUserMgmtList(){
@@ -983,6 +1135,12 @@ function renderAdminUserMgmtList(){
     const avatarEl=u.photo?`<img class="admin-player-avatar" src="${u.photo}">`:`<div class="admin-player-avatar" style="background:rgba(200,151,42,.2);display:flex;align-items:center;justify-content:center;font-size:14px;">${u.horse.emoji}</div>`;
     const todayKey=DB.getTodayKey();
     const rolledToday=!!(u.rolls&&u.rolls[todayKey]);
+    
+    // Disable roll button if rolled today
+    const rollDisabled = rolledToday ? 'disabled' : '';
+    const rollStyle = rolledToday ? 'opacity:0.5; cursor:not-allowed;' : '';
+    
+    // Removed individual lock toggle column as requested
     return `<div class="user-mgmt-row">
       ${avatarEl}
       <div class="user-mgmt-info">
@@ -990,7 +1148,7 @@ function renderAdminUserMgmtList(){
         <div class="user-mgmt-sub">${u.jockey.name} • ${u.distance||0}f • ${rolledToday?'✅ Rolled today':'⏳ Not rolled'}</div>
       </div>
       <div class="user-mgmt-actions">
-        <button class="btn btn-sm btn-outline" onclick="adminRollForUserDirect('${u.username}')">🎲 Roll</button>
+        <button class="btn btn-sm btn-outline" ${rollDisabled} style="${rollStyle}" onclick="adminRollForUserDirect('${u.username}')">🎲 Roll</button>
         <button class="btn btn-sm btn-danger" onclick="adminRemoveUser('${u.username}')">🗑️ Remove</button>
       </div>
     </div>`;
@@ -1066,11 +1224,21 @@ async function refreshRaceTab(){
   const arm=document.getElementById('already-rolled-msg');
   document.getElementById('roll-result-area').classList.add('hidden');
   document.getElementById('bonus-roll-banner').classList.add('hidden');
+  
+  // Check if Global Lock is active
+  const isGlobalLocked = s.globalLock || false;
+
   if(status!=='active'){
     rb.disabled=true; arm.classList.add('hidden');
+  } else if(isGlobalLocked){
+    rb.disabled=true;
+    arm.textContent=`🔒 Rolling is currently locked by Admin. Please contact support.`;
+    arm.className='alert alert-err';
+    arm.classList.remove('hidden');
   } else if(rolledToday&&!pendingBonusRoll){
     rb.disabled=true;
     arm.textContent=`You rolled today! Dice: ${user.rolls[todayKey].map(getDiceEmoji).join('')} — Total: ${user.distance}f. Come back tomorrow!`;
+    arm.className='alert alert-ok';
     arm.classList.remove('hidden');
   } else {
     rb.disabled=false; arm.classList.add('hidden');
@@ -1090,6 +1258,13 @@ async function rollDice(){
   if(getGameStatus()!=='active') return;
   const todayKey=DB.getTodayKey();
   const user=await DB.getUser(currentUser.username);
+  
+  // Double check global lock status
+  if(s.globalLock){
+    alert('Rolling is locked by Admin.');
+    return;
+  }
+
   if(user.rolls&&user.rolls[todayKey]&&!pendingBonusRoll) return;
   document.getElementById('roll-btn').disabled=true;
   document.getElementById('bonus-roll-banner').classList.add('hidden');
@@ -1142,18 +1317,30 @@ function renderTrack(){
   const allPlayers=Object.values(allUsers).filter(u=>!u.isAdmin);
   const c=document.getElementById('race-lanes');
   if(!allPlayers.length){c.innerHTML='<div style="color:rgba(245,240,232,.5);text-align:center;padding:20px;font-size:14px;">No racers yet!</div>';return;}
+  
+  // Sort for rank calculation
+  const sortedPlayers = [...allPlayers].sort((a,b)=>(b.distance||0)-(a.distance||0));
   const maxDist=Math.max(s.raceLength,...allPlayers.map(u=>u.distance||0));
-  c.innerHTML=allPlayers.sort((a,b)=>(b.distance||0)-(a.distance||0)).map(u=>{
+  
+  c.innerHTML=sortedPlayers.map((u, index) => {
     const dist=u.distance||0;
     const pct=Math.min(100,(dist/maxDist)*100);
     const isMe=currentUser&&u.username===currentUser.username;
+    const rank = index + 1;
     const avatarEl=u.photo?`<img class="lane-avatar" src="${u.photo}" alt="">`:`<span style="font-size:20px;line-height:1;">${u.horse.emoji}</span>`;
+    
     return `<div class="track-lane">
-      <div class="lane-label" style="color:rgba(245,240,232,${isMe?'1':'.55'});font-weight:${isMe?'700':'400'}">${u.horse.name.substring(0,6)}</div>
+      <div class="lane-label" style="color:rgba(245,240,232,${isMe?'1':'.55'});font-weight:${isMe?'700':'400'}">#${rank}</div>
       <div class="lane-track">
-        <div class="lane-progress" style="width:${Math.max(5,pct)}%;background:${u.horse.color||'#8B4513'};">${avatarEl}</div>
+        <div class="lane-progress" style="width:${Math.max(5,pct)}%;background:${u.horse.color||'#8B4513'};">
+            ${avatarEl}
+        </div>
         <div class="lane-dist">${dist}f</div>
         <div class="finish-line"></div>
+      </div>
+      <div class="lane-info-text">
+        <span class="lane-info-name">${u.horse.name}</span>
+        <span class="lane-info-jockey">${u.jockey.name}</span>
       </div>
     </div>`;
   }).join('');
@@ -1175,36 +1362,39 @@ async function refreshPowerTab(){
   if(!currentUser) return;
   const user=await DB.getUser(currentUser.username);
   const hasBoost=user.pendingBoost>0;
-  const canAfford=user.distance>=3;
+  const canAfford=user.distance>=2; // Reduced cost to 2
+  const totalSpent = user.totalSpentOnSpins || 0;
+  
   document.getElementById('power-content').innerHTML=`
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:rgba(200,151,42,.1);border:1px solid rgba(200,151,42,.3);border-radius:10px;padding:14px;">
       <span style="font-size:40px;">${user.horse.emoji}</span>
       <div>
         <div style="font-size:17px;font-weight:700;color:var(--derby-dark);">${user.horse.name}</div>
         <div style="font-size:13px;color:var(--derby-brown);">Current distance: <b>${user.distance||0} furlongs</b></div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">Total spent on spins: <b>${totalSpent} furlongs</b></div>
         ${hasBoost?`<div style="font-size:13px;color:var(--derby-green);font-weight:700;margin-top:4px;">⚡ Boost ready: +${user.pendingBoost}% on your next roll!</div>`:''}
       </div>
     </div>
     <h3>Spin the Wheel</h3>
-    <p style="font-size:13px;color:#666;margin-bottom:14px;">Spend <b>3 furlongs</b> to spin — the boost applies to your <b>next day's</b> roll.</p>
+    <p style="font-size:13px;color:#666;margin-bottom:14px;">Spend <b>2 furlongs</b> to spin — the boost applies to your <b>next day's</b> roll.</p>
     ${hasBoost?`<div class="alert alert-ok" style="margin-bottom:14px;">⚡ You have a +${user.pendingBoost}% boost waiting for your next roll!</div>`:''}
     <div class="powerup-grid" id="pu-grid">
       ${POWERUPS.map((p,i)=>`<div class="powerup-card${hasBoost?' disabled':''}" id="pu-card-${i}">
         <div class="powerup-mult" style="color:${p.color};">${p.mult===0?'✗':`+${p.mult}%`}</div>
         <div class="powerup-label">${p.label}</div>
-        <div class="powerup-prob">${p.prob}% chance</div>
+        <!-- Probability hidden as requested -->
       </div>`).join('')}
     </div>
     <div style="text-align:center;">
-      ${!hasBoost&&canAfford?`<button class="btn btn-gold" onclick="spinWheel()">🎡 Spend 3 Furlongs & Spin!</button>`:''}
-      ${!canAfford&&!hasBoost?`<div class="alert alert-warn" style="display:inline-block;">You need at least 3 furlongs to spin. Keep racing!</div>`:''}
+      ${!hasBoost&&canAfford?`<button class="btn btn-gold" onclick="spinWheel()">🎡 Spend 2 Furlongs & Spin!</button>`:''}
+      ${!canAfford&&!hasBoost?`<div class="alert alert-warn" style="display:inline-block;">You need at least 2 furlongs to spin. Keep racing!</div>`:''}
       <div id="spin-result-area" style="margin-top:12px;"></div>
     </div>`;
 }
 
 async function spinWheel(){
   const user=await DB.getUser(currentUser.username);
-  if(user.distance<3){showAlert && alert('Not enough furlongs!');return;}
+  if(user.distance<2){showAlert && alert('Not enough furlongs!');return;}
   document.querySelectorAll('.powerup-card').forEach(c=>c.classList.add('disabled'));
   let ticks=0,curr=0;
   const iv=setInterval(async ()=>{
@@ -1218,7 +1408,9 @@ async function spinWheel(){
       const rand=Math.random()*100; let acc=0,result=POWERUPS[0];
       for(const p of POWERUPS){acc+=p.prob;if(rand<acc){result=p;break;}}
       document.querySelectorAll('.powerup-card').forEach((c,i)=>{c.classList.remove('selected');if(POWERUPS[i].mult===result.mult) c.classList.add('selected');});
-      user.distance-=3; user.pendingBoost=result.mult;
+      user.distance-=2; 
+      user.pendingBoost=result.mult;
+      user.totalSpentOnSpins = (user.totalSpentOnSpins || 0) + 2;
       await DB.saveUser(user.username,user);
       currentUser=user;
       document.getElementById('spin-result-area').innerHTML=`<div class="spin-result" style="border:2px solid ${result.color};color:${result.color};background:rgba(0,0,0,.04);">
