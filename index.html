@@ -228,7 +228,59 @@
   
   .speed-line{position:absolute;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:speed-fly .3s linear infinite;}
   @keyframes speed-fly{from{transform:translateX(100vw);opacity:.8;}to{transform:translateX(-100px);opacity:0;}}
+  
+  /* Edit Profile Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.75);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;
+  }
+  .modal-overlay.hidden{display:none!important;}
+  .modal-content{
+    background:var(--panel-bg);color:var(--derby-dark);
+    border-radius:16px;max-width:500px;width:100%;
+    max-height:90vh;overflow-y:auto;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+    border:2px solid var(--derby-gold);
+    animation:modal-slide-in .3s ease-out;
+  }
+  @keyframes modal-slide-in{
+    from{opacity:0;transform:translateY(-30px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .modal-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 24px;border-bottom:1px solid rgba(200,151,42,.3);
+    background:rgba(200,151,42,.08);border-radius:16px 16px 0 0;
+  }
+  .modal-header h2{
+    font-family:'Playfair Display',serif;font-size:20px;
+    color:var(--derby-red);margin:0;
+  }
+  .modal-close{
+    background:none;border:none;font-size:32px;
+    color:var(--derby-brown);cursor:pointer;
+    line-height:1;padding:0 5px;transition:color .2s;
+  }
+  .modal-close:hover{color:var(--derby-red);}
+  .modal-content h3{
+    font-family:'Playfair Display',serif;font-size:16px;
+    color:var(--derby-brown);margin:16px 24px 10px;
+  }
+  .modal-content .form-group,
+  .modal-content .form-row{padding:0 24px;}
+  .modal-content .mt-20{padding:0 24px 24px;}
 
+  /* Interactive Avatar for editing */
+  .user-bar-info:hover .user-avatar-circle{
+  transform:scale(1.08);
+  box-shadow:0 0 20px rgba(200,151,42,.5);
+  }
+  .user-bar-info:hover .user-detail-name{
+  color:var(--derby-gold);
+  }
+
+  /* Lock Users from rolling */
   .global-lock-control {
     display: flex;
     align-items: center;
@@ -270,6 +322,7 @@
   input:checked + .lock-slider { background-color: var(--derby-red); }
   input:checked + .lock-slider:before { transform: translateX(16px); }
 
+  
   /* Lucky User Animation Overlay */
   #lucky-overlay{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#1a0f0a 0%,#2d1a0a 50%,#c8972a 100%);overflow:hidden;flex-direction:column;align-items:center;justify-content:center;}
   #lucky-overlay.active{display:flex;}
@@ -412,6 +465,7 @@
             <option value="🐎">Bay Thoroughbred</option>
             <option value="🦄">White Stallion</option>
             <option value="🐴">Chestnut Mare</option>
+            <option value="🦓">Zebra</option>
           </select>
         </div>
       </div>
@@ -433,11 +487,97 @@
     </div>
   </div>
 
+<!-- EDIT PROFILE MODAL -->
+  <div id="edit-profile-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>✏️ Edit Profile</h2>
+        <button class="modal-close" onclick="closeEditProfile()">×</button>
+      </div>
+    
+      <div id="edit-alert" class="alert hidden"></div>
+    
+      <div class="form-group">
+        <label>Profile Photo</label>
+        <div class="avatar-upload-area" onclick="document.getElementById('edit-photo-input').click()">
+          <input type="file" id="edit-photo-input" accept="image/*" onchange="handleEditPhoto(this)">
+          <img id="edit-photo-preview" class="avatar-preview-ring" src="" alt="Upload photo">
+          <div class="avatar-upload-hint">Click to change your photo</div>
+        </div>
+      </div>
+    
+      <h3>Jockey Info</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jockey Name</label>
+          <input type="text" id="edit-jockey-name" placeholder="e.g. Wild Rose">
+        </div>
+        <div class="form-group">
+          <label>Silks Color</label>
+          <select id="edit-jockey-color">
+            <option value="red">Red & Gold</option>
+            <option value="blue">Royal Blue</option>
+            <option value="green">Derby Green</option>
+            <option value="purple">Purple Majesty</option>
+          </select>
+        </div>
+      </div>
+    
+      <h3>Horse Info</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Horse Name</label>
+          <input type="text" id="edit-horse-name" placeholder="e.g. Thunder Rose">
+        </div>
+        <div class="form-group">
+          <label>Horse Breed</label>
+          <select id="edit-horse-type" onchange="updateEditHorsePreview()">
+            <option value="🐎">Bay Thoroughbred</option>
+            <option value="🦄">White Stallion</option>
+            <option value="🐴">Chestnut Mare</option>
+            <option value="🦓">Zebra</option>
+          </select>
+        </div>
+      </div>
+    
+      <div class="form-group">
+        <label>Horse Color</label>
+        <div class="color-swatches" id="edit-horse-color-swatches">
+          <div class="swatch" data-color="#8B4513" style="background:#8B4513;" onclick="selectEditHorseColor(this)"></div>
+          <div class="swatch" data-color="#F5F5DC" style="background:#F5F5DC;border:1px solid #ccc;" onclick="selectEditHorseColor(this)"></div>
+          <div class="swatch" data-color="#2C2C2C" style="background:#2C2C2C;" onclick="selectEditHorseColor(this)"></div>
+          <div class="swatch" data-color="#C0C0C0" style="background:#C0C0C0;" onclick="selectEditHorseColor(this)"></div>
+          <div class="swatch" data-color="#CD853F" style="background:#CD853F;" onclick="selectEditHorseColor(this)"></div>
+          <div class="swatch" data-color="#8B0000" style="background:#8B0000;" onclick="selectEditHorseColor(this)"></div>
+        </div>
+      </div>
+    
+      <div class="horse-preview-wrap mt-12">
+        <div class="horse-preview-box" id="edit-horse-preview-box">
+          <span class="chibi-horse" id="edit-horse-preview-emoji">🐎</span>
+        </div>
+        <div style="font-size:12px;color:#888;">Preview</div>
+      </div>
+    
+      <hr class="section-divider">
+    
+      <div class="form-group">
+        <label>Change Password (optional)</label>
+        <input type="password" id="edit-password" placeholder="Leave blank to keep current">
+      </div>
+    
+      <div class="mt-20" style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditProfile()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN GAME -->
   <div id="screen-game" class="hidden">
     <div class="user-bar">
-      <div class="user-bar-info">
-        <img id="ub-avatar" class="user-avatar-circle" src="" alt="avatar">
+      <div class="user-bar-info" style="cursor:pointer;" onclick="openEditProfile()" title="Click to edit profile">
+        <img id="ub-avatar" class="user-avatar-circle" src="" alt="avatar" style="transition:transform .2s;">
         <div>
           <div class="user-detail-name" id="ub-name"></div>
           <div class="user-detail-sub" id="ub-sub"></div>
@@ -668,7 +808,7 @@
 <div id="lucky-overlay">
   <div id="lucky-confetti-container"></div>
   <div class="lucky-contenders-box" id="lucky-contenders-section">
-    <div class="lucky-contenders-title">🍀 Bottom 10 Contenders</div>
+    <div class="lucky-contenders-title">🍀 Our Players</div>
     <div class="lucky-contenders-avatars" id="lucky-contenders-avatars"></div>
     <div class="lucky-pool-display" id="lucky-pool-amount">Pool: 0 Furlongs</div>
   </div>
@@ -995,7 +1135,7 @@ function selectRule(el){
 }
 
 function selectLuckyUserRule(el){
-  if(!confirm('🍀 Lucky User Rule\n\nThis will randomly distribute all accumulated spin furlongs to one of the bottom 10 users (lowest distance).\n\nThe community pool will be reset to 0 after distribution.\n\nProceed?')){
+  if(!confirm('🍀 Lucky User Rule\n\nThis will randomly distribute 20% of all accumulated spin furlongs to ONE random user.\n\nThe community pool will be reset to 0 after distribution.\n\nProceed?')){
     document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));
     const prevRule = currentSettings.rule || 'sum';
     const prevChip = document.querySelector(`.rule-chip[data-rule="${prevRule}"]`);
@@ -1308,6 +1448,145 @@ async function adminRemoveUser(username){
   populateAdminPlayerSelect();
   refreshLeaderboard();
 }
+
+// =========================================================
+// EDIT PROFILE
+// =========================================================
+let editPhotoDataUrl = '';
+let editHorseColor = '#8B4513';
+
+// Open edit profile modal
+async function openEditProfile(){
+  if(!currentUser) return;
+  
+  const user = await DB.getUser(currentUser.username);
+  currentUser = user;
+  
+  // Populate form with current values
+  document.getElementById('edit-photo-preview').src = user.photo || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 90 90\'%3E%3Ccircle cx=\'45\' cy=\'45\' r=\'45\' fill=\'%23c8972a\' opacity=\'.15\'/%3E%3Ctext x=\'45\' y=\'58\' text-anchor=\'middle\' font-size=\'42\'%3E📷%3C/text%3E%3C/svg%3E';
+  document.getElementById('edit-jockey-name').value = user.jockey.name || '';
+  document.getElementById('edit-jockey-color').value = user.jockey.color || 'red';
+  document.getElementById('edit-horse-name').value = user.horse.name || '';
+  document.getElementById('edit-horse-type').value = user.horse.emoji || '🐎';
+  
+  editHorseColor = user.horse.color || '#8B4513';
+  document.querySelectorAll('#edit-horse-color-swatches .swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === editHorseColor);
+  });
+  
+  updateEditHorsePreview();
+  document.getElementById('edit-password').value = '';
+  document.getElementById('edit-alert').classList.add('hidden');
+  editPhotoDataUrl = user.photo || '';
+  
+  document.getElementById('edit-profile-modal').classList.remove('hidden');
+}
+
+function closeEditProfile(){
+  document.getElementById('edit-profile-modal').classList.add('hidden');
+  editPhotoDataUrl = '';
+}
+
+function handleEditPhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const SIZE = 150;
+      canvas.width = SIZE;
+      canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, SIZE, SIZE);
+      editPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+      document.getElementById('edit-photo-preview').src = editPhotoDataUrl;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function selectEditHorseColor(el){
+  document.querySelectorAll('#edit-horse-color-swatches .swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  editHorseColor = el.dataset.color;
+  document.getElementById('edit-horse-preview-box').style.borderColor = editHorseColor;
+}
+
+function updateEditHorsePreview(){
+  document.getElementById('edit-horse-preview-emoji').textContent = document.getElementById('edit-horse-type').value;
+}
+
+async function saveEditProfile(){
+  const jockeyName = document.getElementById('edit-jockey-name').value.trim();
+  const jockeyColor = document.getElementById('edit-jockey-color').value;
+  const horseName = document.getElementById('edit-horse-name').value.trim();
+  const horseEmoji = document.getElementById('edit-horse-type').value;
+  const newPassword = document.getElementById('edit-password').value;
+  
+  // Validation
+  if(!jockeyName || !horseName){
+    showAlert('edit-alert', 'Jockey name and horse name are required!');
+    return;
+  }
+  
+  if(!editPhotoDataUrl){
+    showAlert('edit-alert', 'Profile photo is required!');
+    return;
+  }
+  
+  const alertEl = document.getElementById('edit-alert');
+  alertEl.classList.add('hidden');
+  
+  // Update user data
+  const updatedData = {
+    ...currentUser,
+    jockey: { name: jockeyName, color: jockeyColor },
+    horse: { name: horseName, emoji: horseEmoji, color: editHorseColor },
+    photo: editPhotoDataUrl
+  };
+  
+  if(newPassword){
+    if(newPassword.length < 4){
+      showAlert('edit-alert', 'Password must be at least 4 characters!');
+      return;
+    }
+    updatedData.password = newPassword;
+  }
+  
+  try {
+    await DB.saveUser(currentUser.username, updatedData);
+    currentUser = updatedData;
+    
+    // Update UI
+    document.getElementById('ub-avatar').src = currentUser.photo || '';
+    document.getElementById('ub-name').textContent = `${currentUser.horse.name} & ${currentUser.jockey.name}`;
+    
+    // Refresh other views
+    renderTrack();
+    refreshLeaderboard();
+    
+    closeEditProfile();
+    
+    // Show success message
+    const banner = document.getElementById('game-status-banner');
+    banner.textContent = '✓ Profile updated successfully!';
+    banner.className = 'alert alert-ok';
+    banner.classList.remove('hidden');
+    setTimeout(() => banner.classList.add('hidden'), 3000);
+    
+  } catch(error){
+    console.error('Save failed:', error);
+    showAlert('edit-alert', 'Failed to save profile. Please try again.');
+  }
+}
+
 
 // =========================================================
 // ADMIN GLOBAL LOCK/UNLOCK
@@ -1718,7 +1997,7 @@ function playRidingAnimation(user,dist,onComplete){
 // =========================================================
 // LUCKY USER ANIMATION
 // =========================================================
-async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
+async function playLuckyUserAnimation(eligibleUsers, distributionAmount, onComplete){
   const overlay = document.getElementById('lucky-overlay');
   const confettiContainer = document.getElementById('lucky-confetti-container');
   const contendersSection = document.getElementById('lucky-contenders-section');
@@ -1730,11 +2009,12 @@ async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
   winnerSection.classList.add('hidden');
   confettiContainer.innerHTML = '';
   
-  contendersAvatars.innerHTML = bottom10Users.map(u => 
+  contendersAvatars.innerHTML = eligibleUsers.map(u => 
     `<img class="lucky-contender-avatar" src="${u.photo || ''}" data-username="${u.username}" alt="${u.horse.name}">`
   ).join('');
   
-  poolAmount.textContent = `🎰 Pool: ${totalPool} Furlongs`;
+  // CHANGE: Update text to reflect 20% distribution
+  poolAmount.textContent = `🎰 Prize: ${distributionAmount} Furlongs (20% of Pool)`;
   
   overlay.classList.add('active');
   
@@ -1755,7 +2035,7 @@ async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
       clearInterval(spinInterval);
       const winnerIndex = (currentIndex - 1 + avatarElements.length) % avatarElements.length;
       const winnerUsername = avatarElements[winnerIndex].getAttribute('data-username');
-      const winner = bottom10Users.find(u => u.username === winnerUsername);
+      const winner = eligibleUsers.find(u => u.username === winnerUsername);
       
       setTimeout(() => {
         contendersSection.classList.add('hidden');
@@ -1764,7 +2044,7 @@ async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
         document.getElementById('lucky-avatar').src = winner.photo || '';
         document.getElementById('lucky-name').textContent = winner.horse.name;
         document.getElementById('lucky-horse').textContent = `${winner.horse.emoji} • ${winner.jockey.name}`;
-        document.getElementById('lucky-amount').textContent = `+${totalPool} Furlongs!`;
+        document.getElementById('lucky-amount').textContent = `+${distributionAmount} Furlongs!`;
         
         for(let i=0; i<50; i++){
           const confetti = document.createElement('div');
@@ -1781,7 +2061,7 @@ async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
           confettiContainer.appendChild(confetti);
         }
         
-        animateCounter(totalPool, 2000);
+        animateCounter(distributionAmount, 2000);
         
         setTimeout(()=>{
           overlay.classList.remove('active');
@@ -1808,18 +2088,25 @@ async function executeLuckyUserRule(){
     return;
   }
   
-  const sortedByDistance = [...players].sort((a,b) => (b.distance||0) - (a.distance||0));
-  const bottom10 = sortedByDistance.slice(-10);
+  // CHANGE: Use ALL players instead of bottom 10
+  const eligibleUsers = [...players];
   
-  if(bottom10.length === 0){
+  // CHANGE: Calculate 20% of the pool instead of 100%
+  const distributionAmount = Math.floor(totalSpent * 0.20);
+  
+  if(eligibleUsers.length === 0){
     alert('No eligible players for Lucky User rule!');
     return;
   }
   
-  playLuckyUserAnimation(bottom10, totalSpent, async (winner) => {
+  // Pass all users to animation (or limit to 20 for display purposes if many users)
+  const displayUsers = eligibleUsers.length > 20 ? eligibleUsers.slice(0, 20) : eligibleUsers;
+  
+  playLuckyUserAnimation(displayUsers, distributionAmount, async (winner) => {
     const winnerUser = await DB.getUser(winner.username);
     if(winnerUser) {
-      winnerUser.distance = (winnerUser.distance || 0) + totalSpent;
+      // Add only 20% of the pool to the winner
+      winnerUser.distance = (winnerUser.distance || 0) + distributionAmount;
       await DB.saveUser(winner.username, winnerUser);
     }
     
@@ -1838,7 +2125,8 @@ async function executeLuckyUserRule(){
     renderAdminUserMgmtList();
     refreshPowerTab();
     
-    alert(`🍀 Lucky Winner: ${winner.horse.name} received ${totalSpent} furlongs!\nCommunity pool reset to 0.`);
+    // CHANGE: Update alert message to reflect 20% distribution
+    alert(`🍀 Lucky Winner: ${winner.horse.name} received ${distributionAmount} furlongs (20% of pool)!\nRemaining ${totalSpent - distributionAmount} furlongs are forfeited.\nCommunity pool reset to 0.`);
   });
 }
 
