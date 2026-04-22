@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CQS Derby Horse Racing</title>
+<title>Stars Derby Horse Racing</title>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
 <!-- Firebase SDK -->
@@ -80,7 +80,6 @@
   .swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0;}
   .swatch.active,.swatch:hover{border-color:var(--derby-gold);transform:scale(1.15);}
 
-  /* UPDATED TRACK CSS */
   .track-wrap{background:var(--derby-dark);border-radius:12px;padding:20px 16px;overflow:hidden;border:2px solid rgba(200,151,42,.25);}
   .track-title{font-family:'Rye',serif;font-size:16px;color:var(--derby-gold);text-align:center;margin-bottom:16px;}
   .track-lane{display:grid;grid-template-columns:40px 1fr 160px;align-items:center;gap:10px;margin-bottom:10px;}
@@ -92,7 +91,6 @@
   .lane-dist{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(245,240,232,.85);font-weight:700;white-space:nowrap; z-index: 3;}
   .finish-line{position:absolute;right:0;top:0;bottom:0;width:8px;background:repeating-linear-gradient(180deg,#fff 0,#fff 4px,#000 4px,#000 8px);opacity:.5;border-radius:0 20px 20px 0;}
   
-  /* NEW CLASS FOR TEXT LABELS */
   .lane-info-text {
       font-size: 11px;
       color: rgba(245,240,232,0.8);
@@ -123,6 +121,18 @@
   .rule-chips{display:flex;gap:8px;flex-wrap:wrap;}
   .rule-chip{padding:7px 16px;border-radius:20px;border:2px solid rgba(92,51,23,.3);font-size:13px;cursor:pointer;transition:all .2s;background:#fff;color:var(--derby-dark);}
   .rule-chip.active{background:var(--derby-green);color:#fff;border-color:var(--derby-green);}
+  .rule-chip.lucky-user {
+    background: linear-gradient(135deg, #c8972a 0%, #f5d76e 100%);
+    color: #1a0f0a;
+    border-color: #c8972a;
+    font-weight: 700;
+  }
+  .rule-chip.lucky-user.active {
+    background: linear-gradient(135deg, #f5d76e 0%, #c8972a 100%);
+    color: #1a0f0a;
+    border-color: #1a0f0a;
+    box-shadow: 0 0 15px rgba(200,151,42,0.6);
+  }
   .admin-player-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.07);}
   .admin-player-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--derby-gold);flex-shrink:0;}
   .game-status-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
@@ -137,7 +147,6 @@
   .powerup-card.disabled{opacity:.45;pointer-events:none;}
   .powerup-mult{font-size:20px;font-weight:700;font-family:'Rye',serif;}
   .powerup-label{font-size:11px;color:#555;margin-top:3px;}
-  .powerup-prob{font-size:10px;color:var(--derby-brown);margin-top:3px;font-weight:700;}
   .spin-result{font-size:17px;font-weight:700;padding:14px 24px;border-radius:12px;margin:14px 0;animation:pop-in .5s ease-out;display:inline-block;}
 
   .leaderboard-list{list-style:none;}
@@ -183,7 +192,6 @@
   .add-user-form{background:rgba(200,151,42,.08);border:1px solid rgba(200,151,42,.3);border-radius:8px;padding:16px;margin-bottom:14px;}
   .add-user-form h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--derby-brown);margin-bottom:12px;}
 
-  /* Loading indicator */
   .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:9999;}
   .loading-spinner{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--derby-gold);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;}
   @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
@@ -205,9 +213,9 @@
   @keyframes horse-gallop{0%{transform:translateX(-50%) translateY(0) rotate(-1deg);}100%{transform:translateX(-50%) translateY(-6px) rotate(1deg);}}
   
   .ride-horse-stack{position:relative;display:inline-block;text-align:center;}
-  .ride-avatar-jockey{width:50px;height:50px;border-radius:50%;object-fit:cover;border:3px solid var(--derby-gold);display:block;position:absolute;top:-46px;left:50%;transform:translateX(-50%);animation:jockey-bounce .25s ease-in-out infinite alternate;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+  .ride-avatar-jockey{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--derby-gold);display:block;position:absolute;top:-90px;left:50%;transform:translateX(-50%);animation:jockey-bounce .25s ease-in-out infinite alternate;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
   @keyframes jockey-bounce{0%{transform:translateX(-50%) rotate(-5deg) translateY(0);}100%{transform:translateX(-50%) rotate(5deg) translateY(-5px);}}
-  .ride-horse-emoji{font-size:72px;line-height:1;display:block;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.5));}
+  .ride-horse-emoji{font-size:144px;line-height:1;display:block;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.5));}
   .ride-counter{position:absolute;top:10%;left:50%;transform:translateX(-50%);text-align:center;z-index:2;}
   .ride-counter-label{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:3px;text-transform:uppercase;}
   .ride-counter-number{font-family:'Rye',serif;font-size:64px;color:var(--derby-gold);text-shadow:0 0 20px rgba(200,151,42,.6),2px 2px 0 rgba(0,0,0,.5);line-height:1;animation:counter-pop .3s ease-out;}
@@ -221,7 +229,6 @@
   .speed-line{position:absolute;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:speed-fly .3s linear infinite;}
   @keyframes speed-fly{from{transform:translateX(100vw);opacity:.8;}to{transform:translateX(-100px);opacity:0;}}
 
-  /* Global Lock Toggle Styles */
   .global-lock-control {
     display: flex;
     align-items: center;
@@ -263,13 +270,78 @@
   input:checked + .lock-slider { background-color: var(--derby-red); }
   input:checked + .lock-slider:before { transform: translateX(16px); }
 
+  /* Lucky User Animation Overlay */
+  #lucky-overlay{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#1a0f0a 0%,#2d1a0a 50%,#c8972a 100%);overflow:hidden;flex-direction:column;align-items:center;justify-content:center;}
+  #lucky-overlay.active{display:flex;}
+  .lucky-confetti{position:absolute;width:10px;height:10px;background:var(--derby-gold);animation:confetti-fall linear forwards;}
+  @keyframes confetti-fall{0%{transform:translateY(-100px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+  
+  .lucky-contenders-box{background:rgba(0,0,0,.6);border:3px solid var(--derby-gold);border-radius:20px;padding:30px;text-align:center;margin-bottom:20px;animation:pop-in .5s ease-out;max-width:90%;}
+  .lucky-contenders-title{font-family:'Rye',serif;font-size:20px;color:var(--derby-gold);margin-bottom:15px;}
+  .lucky-contenders-avatars{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:600px;}
+  .lucky-contender-avatar{width:60px;height:60px;border-radius:50%;border:3px solid rgba(200,151,42,.5);object-fit:cover;transition:all .2s;opacity:.6;}
+  .lucky-contender-avatar.spinning{animation:contender-spin .3s ease-in-out infinite alternate;border-color:var(--derby-gold);opacity:1;}
+  .lucky-contender-avatar.winner{border-color:#4caf50;box-shadow:0 0 30px #4caf50;transform:scale(1.3);opacity:1;}
+  @keyframes contender-spin{0%{transform:scale(1) rotate(-5deg);}100%{transform:scale(1.1) rotate(5deg);}}
+  
+  .lucky-winner-box{background:rgba(0,0,0,.6);border:3px solid var(--derby-gold);border-radius:20px;padding:40px;text-align:center;animation:pop-in .5s ease-out;}
+  .lucky-winner-avatar{width:120px;height:120px;border-radius:50%;border:4px solid var(--derby-gold);object-fit:cover;margin:0 auto 20px;display:block;animation:pulse-glow 1s ease-in-out infinite;}
+  @keyframes pulse-glow{0%,100%{box-shadow:0 0 20px var(--derby-gold);}50%{box-shadow:0 0 40px var(--derby-gold),0 0 60px rgba(200,151,42,.5);}}
+  .lucky-winner-name{font-family:'Rye',serif;font-size:32px;color:var(--derby-gold);margin-bottom:10px;}
+  .lucky-winner-horse{font-size:24px;color:#fff;margin-bottom:15px;}
+  .lucky-amount{font-family:'Playfair Display',serif;font-size:48px;color:#4caf50;font-weight:700;text-shadow:0 0 20px rgba(76,175,80,.5);}
+  .lucky-label{font-size:14px;color:rgba(255,255,255,.7);letter-spacing:2px;text-transform:uppercase;margin-top:8px;}
+  .lucky-pool-display{font-size:16px;color:var(--derby-gold);margin-top:15px;}
+
+  /* Admin Roll Dice Display */
+  .admin-roll-dice-area {
+    background: rgba(200,151,42,.08);
+    border: 1px solid rgba(200,151,42,.3);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .admin-roll-dice-display {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .admin-die {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: #fff;
+    border: 2px solid var(--derby-brown);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 2px 2px 0 var(--derby-brown);
+  }
+  .admin-die.rolling {
+    animation: roll .5s ease-in-out infinite alternate;
+  }
+  .admin-roll-result-text {
+    font-size: 13px;
+    color: var(--derby-green);
+    font-weight: 700;
+    min-height: 20px;
+    margin-top: 8px;
+  }
+
   @media(max-width:600px){
     .panel{padding:20px 16px;}.form-row{grid-template-columns:1fr;}.tabs{flex-wrap:wrap;}
-    .ride-counter-number{font-size:44px;}.ride-horse-emoji{font-size:52px;}.ride-avatar-jockey{width:36px;height:36px;top:-34px;}
+    .ride-counter-number{font-size:44px;}.ride-horse-emoji{font-size:100px;}.ride-avatar-jockey{width:70px;height:70px;top:-65px;}
     .powerup-grid{grid-template-columns:repeat(3,1fr);}
     .user-mgmt-row{flex-wrap:wrap;}.user-mgmt-actions{margin-top:8px;width:100%;justify-content:flex-end;}
-    .track-lane{grid-template-columns:30px 1fr 100px;} /* Adjust for mobile */
+    .track-lane{grid-template-columns:30px 1fr 100px;}
     .lane-info-text{font-size:9px;}
+    .lucky-winner-name{font-size:24px;}.lucky-amount{font-size:36px;}.lucky-winner-avatar{width:90px;height:90px;}
+    .lucky-contender-avatar{width:45px;height:45px;}
+    .lucky-contenders-avatars{gap:8px;}
+    .admin-die{width:40px;height:40px;font-size:24px;}
   }
 </style>
 </head>
@@ -282,7 +354,7 @@
   </div>
 
   <header class="site-header">
-    <div class="site-title">CQS Derby Horse Racing</div>
+    <div class="site-title">Stars Derby Horse Racing</div>
     <div class="site-subtitle">Roll the dice &mdash; Race to glory</div>
   </header>
 
@@ -446,7 +518,6 @@
         <h4>🎲 Dice Configuration</h4>
         <div class="form-group"><label>Number of Dice (1–6)</label><input type="number" id="admin-num-dice" min="1" max="6" value="2" style="width:100px;"></div>
         
-        <!-- NEW GLOBAL LOCK TOGGLE -->
         <div class="global-lock-control">
           <span style="font-size:13px;font-weight:700;color:var(--derby-brown);">🔒 Global Lock (Prevent All Rolling)</span>
           <label class="lock-toggle">
@@ -462,9 +533,10 @@
         <div class="rule-chips" id="rule-chips">
           <div class="rule-chip active" data-rule="sum" onclick="selectRule(this)">Sum of Dice</div>
           <div class="rule-chip" data-rule="multiply" onclick="selectRule(this)">Multiply All</div>
-          <div class="rule-chip" data-rule="max" onclick="selectRule(this)">Highest Die</div>
-          <div class="rule-chip" data-rule="min" onclick="selectRule(this)">Lowest Die</div>
+          <div class="rule-chip" data-rule="max" onclick="selectRule(this)">Highest Dice x 2</div>
+          <div class="rule-chip" data-rule="min" onclick="selectRule(this)">Lowest Dice x 3</div>
           <div class="rule-chip" data-rule="sum_x2" onclick="selectRule(this)">Sum × 2</div>
+          <div class="rule-chip lucky-user" data-rule="lucky_user" onclick="selectLuckyUserRule(this)">🍀 Lucky User</div>
         </div>
       </div>
 
@@ -479,7 +551,12 @@
           <select id="admin-roll-player" style="flex:1;min-width:160px;padding:9px 12px;border:1.5px solid rgba(92,51,23,.3);border-radius:8px;font-size:14px;background:#fff;color:var(--derby-dark);"></select>
           <button class="btn btn-sm btn-gold" onclick="adminRollForPlayer()">🎲 Roll for Player</button>
         </div>
-        <div id="admin-roll-result" style="font-size:13px;color:var(--derby-green);margin-top:8px;font-weight:700;min-height:20px;"></div>
+        
+        <!-- NEW: Admin Dice Display Area -->
+        <div class="admin-roll-dice-area">
+          <div id="admin-dice-display" class="admin-roll-dice-display"></div>
+          <div id="admin-roll-result" class="admin-roll-result-text"></div>
+        </div>
       </div>
 
       <div class="admin-section">
@@ -587,9 +664,27 @@
   <div class="ride-scene" id="ride-scene-actor"></div>
 </div>
 
+<!-- LUCKY USER OVERLAY -->
+<div id="lucky-overlay">
+  <div id="lucky-confetti-container"></div>
+  <div class="lucky-contenders-box" id="lucky-contenders-section">
+    <div class="lucky-contenders-title">🍀 Bottom 10 Contenders</div>
+    <div class="lucky-contenders-avatars" id="lucky-contenders-avatars"></div>
+    <div class="lucky-pool-display" id="lucky-pool-amount">Pool: 0 Furlongs</div>
+  </div>
+  <div class="lucky-winner-box hidden" id="lucky-winner-section">
+    <img id="lucky-avatar" class="lucky-winner-avatar" src="" alt="winner">
+    <div class="lucky-winner-name" id="lucky-name"></div>
+    <div class="lucky-winner-horse" id="lucky-horse"></div>
+    <div class="lucky-amount" id="lucky-amount"></div>
+    <div class="lucky-label">🍀 Lucky Bonus Furlongs!</div>
+    <div class="lucky-pool-display" id="lucky-pool-reset">Community Pool Reset to 0</div>
+  </div>
+</div>
+
 <script>
 // =========================================================
-// FIREBASE CONFIGURATION - REPLACE WITH YOUR OWN!
+// FIREBASE CONFIGURATION
 // =========================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDLBmFxSX-CNO5U-ImVo_FcDBJwSa7rvO8",
@@ -601,13 +696,12 @@ const firebaseConfig = {
   appId: "1:67011797802:web:8647425e01a7a3fcb5b453"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
 // =========================================================
-// DB - Now uses Firebase instead of localStorage
+// DB
 // =========================================================
 const DB = {
   async getUsers(){
@@ -635,7 +729,6 @@ const DB = {
     const d=new Date();
     return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
   },
-  // Listen for real-time updates
   onUsersUpdate(callback){
     db.ref('users').on('value', snapshot => {
       callback(snapshot.val() || {});
@@ -652,18 +745,17 @@ const DB = {
 // STATE
 // =========================================================
 let currentUser=null, selectedHorseColor='#8B4513', regPhotoDataUrl='', pendingBonusRoll=false, prevLbOrder=[], allUsers={}, currentSettings={};
-let adminPhotoDataUrl = ''; // For admin add user form
+let adminPhotoDataUrl = '';
+let bonusRollForUser = null;
 
 // =========================================================
 // INITIALIZATION
 // =========================================================
 async function initGame(){
   try {
-    // Load initial data
     allUsers = await DB.getUsers();
     currentSettings = await DB.getSettings();
     
-    // Set up real-time listeners
     DB.onUsersUpdate(users => {
       allUsers = users;
       if(currentUser) {
@@ -680,24 +772,20 @@ async function initGame(){
       updateGameStatusBanner();
       if(document.getElementById('tab-admin') && !document.getElementById('tab-admin').classList.contains('hidden')){
         updateAdminStatusIndicator();
-        // Update global lock toggle UI
         const toggle = document.getElementById('admin-global-lock-toggle');
         if(toggle) toggle.checked = !!settings.globalLock;
         updateGlobalLockLabel(!!settings.globalLock);
       }
     });
     
-    // Hide loading overlay
     document.getElementById('loading-overlay').classList.add('hidden');
     
-    // Check if user is already logged in
     const savedUser = localStorage.getItem('current_user');
     if(savedUser){
       const user = await DB.getUser(JSON.parse(savedUser).username);
       if(user) enterGame(user);
     }
     
-    // Seed admin account if it doesn't exist
     if(!allUsers['humana_derby'] && !allUsers['admin']){
       await DB.saveUser('humana_derby', {
         username:'humana_derby',
@@ -778,12 +866,12 @@ function handleRegPhoto(input){
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
-      const SIZE=200; canvas.width=SIZE; canvas.height=SIZE;
+      const SIZE=150; canvas.width=SIZE; canvas.height=SIZE;
       const ctx=canvas.getContext('2d');
       const min=Math.min(img.width,img.height);
       const sx=(img.width-min)/2, sy=(img.height-min)/2;
       ctx.drawImage(img,sx,sy,min,min,0,0,SIZE,SIZE);
-      regPhotoDataUrl=canvas.toDataURL('image/jpeg',0.72);
+      regPhotoDataUrl=canvas.toDataURL('image/jpeg',0.6);
       document.getElementById('reg-photo-preview').src=regPhotoDataUrl;
     };
     img.src=e.target.result;
@@ -798,12 +886,12 @@ function handleAdminPhoto(input){
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
-      const SIZE=200; canvas.width=SIZE; canvas.height=SIZE;
+      const SIZE=150; canvas.width=SIZE; canvas.height=SIZE;
       const ctx=canvas.getContext('2d');
       const min=Math.min(img.width,img.height);
       const sx=(img.width-min)/2, sy=(img.height-min)/2;
       ctx.drawImage(img,sx,sy,min,min,0,0,SIZE,SIZE);
-      adminPhotoDataUrl=canvas.toDataURL('image/jpeg',0.72);
+      adminPhotoDataUrl=canvas.toDataURL('image/jpeg',0.6);
       document.getElementById('add-user-photo-preview').src=adminPhotoDataUrl;
     };
     img.src=e.target.result;
@@ -879,6 +967,10 @@ function showGameTab(tab){
 // ADMIN
 // =========================================================
 async function showAdmin(){
+  // Reset bonus roll state when opening admin panel
+  pendingBonusRoll = false;
+  bonusRollForUser = null;
+  
   ['race','leaderboard','power'].forEach(t=>document.getElementById(`tab-${t}`).classList.add('hidden'));
   document.querySelectorAll('#game-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   const s=currentSettings;
@@ -891,11 +983,29 @@ async function showAdmin(){
   renderAdminPlayerList();
   renderAdminUserMgmtList();
   populateAdminPlayerSelect();
+  setupAdminDiceDisplay(s.numDice, null);
   document.getElementById('tab-admin').classList.remove('hidden');
 }
 
 function backToGame(){document.getElementById('tab-admin').classList.add('hidden');showGameTab('race');}
-function selectRule(el){document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+
+function selectRule(el){
+  document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectLuckyUserRule(el){
+  if(!confirm('🍀 Lucky User Rule\n\nThis will randomly distribute all accumulated spin furlongs to one of the bottom 10 users (lowest distance).\n\nThe community pool will be reset to 0 after distribution.\n\nProceed?')){
+    document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));
+    const prevRule = currentSettings.rule || 'sum';
+    const prevChip = document.querySelector(`.rule-chip[data-rule="${prevRule}"]`);
+    if(prevChip) prevChip.classList.add('active');
+    return;
+  }
+  document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  executeLuckyUserRule();
+}
 
 function updateAdminStatusIndicator(){
   const status=getGameStatus();
@@ -937,6 +1047,8 @@ async function saveAdminSettings(){
   const msg=document.getElementById('admin-save-msg');
   msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2500);
   updateAdminStatusIndicator(); updateGameStatusBanner();
+  // Update admin dice display when settings change
+  setupAdminDiceDisplay(numDice, null);
 }
 
 async function adminResetRace(){
@@ -958,9 +1070,22 @@ async function adminResetRace(){
 }
 
 function populateAdminPlayerSelect(){
+  // FIX: Don't repopulate if bonus roll is pending for a specific user
+  if(pendingBonusRoll && bonusRollForUser) {
+    const playerSelect = document.getElementById('admin-roll-player');
+    if(playerSelect) {
+      playerSelect.value = bonusRollForUser;
+      playerSelect.disabled = true;
+    }
+    return;  // Exit early - don't rebuild the dropdown
+  }
+  
   const sel=document.getElementById('admin-roll-player');
   const players=Object.values(allUsers).filter(u=>!u.isAdmin);
   const todayKey = DB.getTodayKey();
+  
+  // Save current selection before rebuilding
+  const currentValue = sel ? sel.value : null;
   
   sel.innerHTML=players.length?players.map(u=>{
     const hasRolledToday = u.rolls && u.rolls[todayKey];
@@ -968,52 +1093,133 @@ function populateAdminPlayerSelect(){
     const style = hasRolledToday ? 'color:#999;' : '';
     return `<option value="${u.username}" ${isDisabled} style="${style}">${u.horse.emoji} ${u.horse.name} (@${u.username}) ${hasRolledToday ? '— Rolled' : ''}</option>`;
   }).join(''):'<option>No players yet</option>';
+  
+  // Restore selection if possible
+  if(currentValue && sel.querySelector(`option[value="${currentValue}"]`)) {
+    sel.value = currentValue;
+  }
 }
 
 // =========================================================
-// ADMIN ROLL FOR PLAYER - WITH ANIMATION & LOCK LOGIC
+// ADMIN DICE DISPLAY
+// =========================================================
+function setupAdminDiceDisplay(n, vals){
+  const c = document.getElementById('admin-dice-display');
+  if(!c) return;
+  c.innerHTML = '';
+  for(let i=0; i<n; i++){
+    const d = document.createElement('div');
+    d.className = 'admin-die';
+    d.id = `admin-die-${i}`;
+    d.textContent = vals ? getDiceEmoji(vals[i]) : '🎲';
+    c.appendChild(d);
+  }
+}
+
+// =========================================================
+// ADMIN ROLL FOR PLAYER - WITH DICE ANIMATION
 // =========================================================
 async function adminRollForPlayer(){
-  const uname=document.getElementById('admin-roll-player').value;
+  const uname = document.getElementById('admin-roll-player').value;
   if(!uname || uname === 'No players yet') return;
-  const user=await DB.getUser(uname);
-  if(!user||user.isAdmin) return;
+  const user = await DB.getUser(uname);
+  if(!user || user.isAdmin) return;
   
-  const s=currentSettings;
-  const todayKey=DB.getTodayKey();
+  const s = currentSettings;
+  const todayKey = DB.getTodayKey();
   
-  // Check if already rolled today
-  if(user.rolls && user.rolls[todayKey] && user.rolls[todayKey].length >= s.numDice) {
-      document.getElementById('admin-roll-result').textContent = `❌ ${user.horse.name} has already rolled today!`;
-      document.getElementById('admin-roll-result').style.color = 'var(--derby-red)';
-      populateAdminPlayerSelect(); // Refresh to disable
-      return;
+  // FIX: Allow roll if pendingBonusRoll is true for THIS user, even if they have rolled today
+  if(user.rolls && user.rolls[todayKey] && user.rolls[todayKey].length >= s.numDice && !(pendingBonusRoll && bonusRollForUser === uname)) {
+    document.getElementById('admin-roll-result').textContent = `❌ ${user.horse.name} has already rolled today!`;
+    document.getElementById('admin-roll-result').style.color = 'var(--derby-red)';
+    return;
   }
 
-  const rolls=Array.from({length:s.numDice},()=>Math.ceil(Math.random()*6));
-  const boost=user.pendingBoost||0;
-  const dist=applyBoostAndCompute(rolls,s.rule,boost);
-  user.distance=(user.distance||0)+dist;
-  if(!user.rolls) user.rolls={};
-  user.rolls[todayKey]=(user.rolls[todayKey]||[]).concat(rolls);
-  user.pendingBoost=0; // Consume boost
-  await DB.saveUser(uname,user);
+  // Setup and show dice display
+  setupAdminDiceDisplay(s.numDice, null);
   
-  document.getElementById('admin-roll-result').textContent=`Rolled for ${user.horse.name}: ${formatFormula(rolls,s.rule)} → +${dist} furlongs${boost?` (incl. ${boost}% boost)`:''}`;
+  // Start dice rolling animation
+  for(let i=0; i<s.numDice; i++) {
+    const die = document.getElementById(`admin-die-${i}`);
+    if(die) die.classList.add('rolling');
+  }
   
-  playRidingAnimation(user,dist,()=>{
-    renderAdminPlayerList();
-    renderAdminUserMgmtList();
-    populateAdminPlayerSelect();
-    refreshLeaderboard();
-    
-    // Check for bonus roll (all dice same)
-    if(allSame(rolls) && s.numDice > 1) {
-        document.getElementById('admin-roll-result').textContent += " 🎰 BONUS ROLL ALLOWED!";
-    } else {
-        // If not bonus, the select option will be disabled on next render of populateAdminPlayerSelect
+  let ticks = 0;
+  const iv = setInterval(async () => {
+    ticks++;
+    for(let i=0; i<s.numDice; i++) {
+      const die = document.getElementById(`admin-die-${i}`);
+      if(die) die.textContent = getDiceEmoji(Math.ceil(Math.random()*6));
     }
-  });
+    if(ticks >= 15){
+      clearInterval(iv);
+      const rolls = Array.from({length: s.numDice}, () => Math.ceil(Math.random()*6));
+      for(let i=0; i<s.numDice; i++){
+        const die = document.getElementById(`admin-die-${i}`);
+        if(die) {
+          die.classList.remove('rolling');
+          die.textContent = getDiceEmoji(rolls[i]);
+        }
+      }
+      
+      const boost = user.pendingBoost || 0;
+      const dist = applyBoostAndCompute(rolls, s.rule, boost);
+      user.distance = (user.distance || 0) + dist;
+      if(!user.rolls) user.rolls = {};
+      user.rolls[todayKey] = (user.rolls[todayKey] || []).concat(rolls);
+      user.pendingBoost = 0;
+      await DB.saveUser(uname, user);
+      
+      document.getElementById('admin-roll-result').textContent = `🎲 ${formatFormula(rolls, s.rule)} = ${dist} furlongs${boost ? ` (+${boost}% boost)` : ''}`;
+      document.getElementById('admin-roll-result').style.color = 'var(--derby-green)';
+      
+      // Check for Bonus Roll
+      const isBonus = allSame(rolls) && s.numDice > 1;
+      
+      // Play riding animation after dice roll
+      playRidingAnimation(user, dist, () => {
+        renderAdminPlayerList();
+        renderAdminUserMgmtList();
+        refreshLeaderboard();
+        
+        if(isBonus) {
+          // FIX: Set global flag AND track which user has the bonus
+          pendingBonusRoll = true;
+          bonusRollForUser = uname;  // Remember this user
+          document.getElementById('admin-roll-result').textContent += " 🎰 BONUS ROLL ALLOWED!";
+          
+          // Disable player select to force rolling for the same user
+          const playerSelect = document.getElementById('admin-roll-player');
+          if(playerSelect) {
+            playerSelect.disabled = true;
+            // Keep the current value - don't repopulate!
+          }
+          
+          // Visual cue on button
+          const rollBtn = document.querySelector('button[onclick="adminRollForPlayer()"]');
+          if(rollBtn) {
+            rollBtn.textContent = "🎰 Roll Bonus!";
+            rollBtn.style.background = "var(--derby-gold)";
+          }
+        } else {
+          // Reset state if no bonus
+          pendingBonusRoll = false;
+          bonusRollForUser = null;
+          const playerSelect = document.getElementById('admin-roll-player');
+          if(playerSelect) playerSelect.disabled = false;
+          
+          const rollBtn = document.querySelector('button[onclick="adminRollForPlayer()"]');
+          if(rollBtn) {
+            rollBtn.textContent = "🎲 Roll for Player";
+            rollBtn.style.background = "";
+          }
+          
+          // Now safe to repopulate dropdown
+          populateAdminPlayerSelect();
+        }
+      });
+    }
+  }, 80);
 }
 
 // =========================================================
@@ -1136,11 +1342,9 @@ function renderAdminUserMgmtList(){
     const todayKey=DB.getTodayKey();
     const rolledToday=!!(u.rolls&&u.rolls[todayKey]);
     
-    // Disable roll button if rolled today
     const rollDisabled = rolledToday ? 'disabled' : '';
     const rollStyle = rolledToday ? 'opacity:0.5; cursor:not-allowed;' : '';
     
-    // Removed individual lock toggle column as requested
     return `<div class="user-mgmt-row">
       ${avatarEl}
       <div class="user-mgmt-info">
@@ -1182,8 +1386,8 @@ function getDiceEmoji(v){return['','⚀','⚁','⚂','⚃','⚄','⚅'][v]||'�
 function computeRaw(rolls,rule){
   if(rule==='sum') return rolls.reduce((a,b)=>a+b,0);
   if(rule==='multiply') return rolls.reduce((a,b)=>a*b,1);
-  if(rule==='max') return Math.max(...rolls);
-  if(rule==='min') return Math.min(...rolls);
+  if(rule==='max') return Math.max(...rolls)*2;
+  if(rule==='min') return Math.min(...rolls)*3;
   if(rule==='sum_x2') return rolls.reduce((a,b)=>a+b,0)*2;
   return rolls.reduce((a,b)=>a+b,0);
 }
@@ -1194,13 +1398,13 @@ function applyBoostAndCompute(rolls,rule,boostPct){
 
 function formatFormula(rolls,rule){
   if(rule==='multiply') return rolls.join(' × ');
-  if(rule==='max') return `max(${rolls.join(', ')})`;
-  if(rule==='min') return `min(${rolls.join(', ')})`;
+  if(rule==='max') return `max(${rolls.join(', ')}) x 2`;
+  if(rule==='min') return `min(${rolls.join(', ')}) x 3`;
   if(rule==='sum_x2') return `(${rolls.join(' + ')}) × 2`;
   return rolls.join(' + ');
 }
 
-function ruleLabel(r){return{sum:'Sum',multiply:'Multiply',max:'Highest Die',min:'Lowest Die',sum_x2:'Sum×2'}[r]||r;}
+function ruleLabel(r){return{sum:'Sum',multiply:'Multiply',max:'Highest Dice x 2',min:'Lowest Dice xv2',sum_x2:'Sum×2',lucky_user:'🍀 Lucky User'}[r]||r;}
 function allSame(rolls){return rolls.length>1&&rolls.every(r=>r===rolls[0]);}
 
 // =========================================================
@@ -1225,7 +1429,6 @@ async function refreshRaceTab(){
   document.getElementById('roll-result-area').classList.add('hidden');
   document.getElementById('bonus-roll-banner').classList.add('hidden');
   
-  // Check if Global Lock is active
   const isGlobalLocked = s.globalLock || false;
 
   if(status!=='active'){
@@ -1259,7 +1462,6 @@ async function rollDice(){
   const todayKey=DB.getTodayKey();
   const user=await DB.getUser(currentUser.username);
   
-  // Double check global lock status
   if(s.globalLock){
     alert('Rolling is locked by Admin.');
     return;
@@ -1318,7 +1520,6 @@ function renderTrack(){
   const c=document.getElementById('race-lanes');
   if(!allPlayers.length){c.innerHTML='<div style="color:rgba(245,240,232,.5);text-align:center;padding:20px;font-size:14px;">No racers yet!</div>';return;}
   
-  // Sort for rank calculation
   const sortedPlayers = [...allPlayers].sort((a,b)=>(b.distance||0)-(a.distance||0));
   const maxDist=Math.max(s.raceLength,...allPlayers.map(u=>u.distance||0));
   
@@ -1358,12 +1559,17 @@ const POWERUPS=[
   {mult:200, label:'+200% Speed', prob:3,  color:'#ff9800'},
 ];
 
+function getTotalSpentOnSpins(){
+  return Object.values(allUsers).reduce((total, u) => total + (u.totalSpentOnSpins || 0), 0);
+}
+
 async function refreshPowerTab(){
   if(!currentUser) return;
   const user=await DB.getUser(currentUser.username);
   const hasBoost=user.pendingBoost>0;
-  const canAfford=user.distance>=2; // Reduced cost to 2
+  const canAfford=user.distance>=2;
   const totalSpent = user.totalSpentOnSpins || 0;
+  const totalAllUsers = getTotalSpentOnSpins();
   
   document.getElementById('power-content').innerHTML=`
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:rgba(200,151,42,.1);border:1px solid rgba(200,151,42,.3);border-radius:10px;padding:14px;">
@@ -1375,6 +1581,13 @@ async function refreshPowerTab(){
         ${hasBoost?`<div style="font-size:13px;color:var(--derby-green);font-weight:700;margin-top:4px;">⚡ Boost ready: +${user.pendingBoost}% on your next roll!</div>`:''}
       </div>
     </div>
+    
+    <div style="background:linear-gradient(135deg, rgba(200,151,42,.2) 0%, rgba(200,151,42,.05) 100%);border:2px solid var(--derby-gold);border-radius:10px;padding:16px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:12px;color:var(--derby-brown);letter-spacing:1px;text-transform:uppercase;">🎰 Community Spin Pool</div>
+      <div style="font-size:28px;font-weight:700;color:var(--derby-gold);font-family:'Rye',serif;">${totalAllUsers} Furlongs</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;">Total furlongs spent on spins by all users</div>
+    </div>
+    
     <h3>Spin the Wheel</h3>
     <p style="font-size:13px;color:#666;margin-bottom:14px;">Spend <b>2 furlongs</b> to spin — the boost applies to your <b>next day's</b> roll.</p>
     ${hasBoost?`<div class="alert alert-ok" style="margin-bottom:14px;">⚡ You have a +${user.pendingBoost}% boost waiting for your next roll!</div>`:''}
@@ -1382,7 +1595,6 @@ async function refreshPowerTab(){
       ${POWERUPS.map((p,i)=>`<div class="powerup-card${hasBoost?' disabled':''}" id="pu-card-${i}">
         <div class="powerup-mult" style="color:${p.color};">${p.mult===0?'✗':`+${p.mult}%`}</div>
         <div class="powerup-label">${p.label}</div>
-        <!-- Probability hidden as requested -->
       </div>`).join('')}
     </div>
     <div style="text-align:center;">
@@ -1501,6 +1713,133 @@ function playRidingAnimation(user,dist,onComplete){
   animateCounter(dist,2200);
   const dustIv=setInterval(spawnDust,180);
   setTimeout(()=>{clearInterval(dustIv);document.getElementById('ride-overlay').classList.remove('active');if(onComplete) onComplete();},3900);
+}
+
+// =========================================================
+// LUCKY USER ANIMATION
+// =========================================================
+async function playLuckyUserAnimation(bottom10Users, totalPool, onComplete){
+  const overlay = document.getElementById('lucky-overlay');
+  const confettiContainer = document.getElementById('lucky-confetti-container');
+  const contendersSection = document.getElementById('lucky-contenders-section');
+  const winnerSection = document.getElementById('lucky-winner-section');
+  const contendersAvatars = document.getElementById('lucky-contenders-avatars');
+  const poolAmount = document.getElementById('lucky-pool-amount');
+  
+  contendersSection.classList.remove('hidden');
+  winnerSection.classList.add('hidden');
+  confettiContainer.innerHTML = '';
+  
+  contendersAvatars.innerHTML = bottom10Users.map(u => 
+    `<img class="lucky-contender-avatar" src="${u.photo || ''}" data-username="${u.username}" alt="${u.horse.name}">`
+  ).join('');
+  
+  poolAmount.textContent = `🎰 Pool: ${totalPool} Furlongs`;
+  
+  overlay.classList.add('active');
+  
+  const avatarElements = contendersAvatars.querySelectorAll('.lucky-contender-avatar');
+  let currentIndex = 0;
+  let spinCount = 0;
+  const maxSpins = 20 + Math.floor(Math.random() * 10);
+  
+  const spinInterval = setInterval(() => {
+    avatarElements.forEach(el => el.classList.remove('spinning'));
+    if(avatarElements[currentIndex]) {
+      avatarElements[currentIndex].classList.add('spinning');
+    }
+    currentIndex = (currentIndex + 1) % avatarElements.length;
+    spinCount++;
+    
+    if(spinCount >= maxSpins) {
+      clearInterval(spinInterval);
+      const winnerIndex = (currentIndex - 1 + avatarElements.length) % avatarElements.length;
+      const winnerUsername = avatarElements[winnerIndex].getAttribute('data-username');
+      const winner = bottom10Users.find(u => u.username === winnerUsername);
+      
+      setTimeout(() => {
+        contendersSection.classList.add('hidden');
+        winnerSection.classList.remove('hidden');
+        
+        document.getElementById('lucky-avatar').src = winner.photo || '';
+        document.getElementById('lucky-name').textContent = winner.horse.name;
+        document.getElementById('lucky-horse').textContent = `${winner.horse.emoji} • ${winner.jockey.name}`;
+        document.getElementById('lucky-amount').textContent = `+${totalPool} Furlongs!`;
+        
+        for(let i=0; i<50; i++){
+          const confetti = document.createElement('div');
+          confetti.className = 'lucky-confetti';
+          const colors = ['#c8972a', '#4caf50', '#f44336', '#2196f3', '#9c27b0', '#ff9800'];
+          confetti.style.cssText = `
+            left: ${Math.random()*100}%;
+            background: ${colors[Math.floor(Math.random()*colors.length)]};
+            animation-duration: ${2+Math.random()*2}s;
+            animation-delay: ${Math.random()*0.5}s;
+            width: ${8+Math.random()*12}px;
+            height: ${8+Math.random()*12}px;
+          `;
+          confettiContainer.appendChild(confetti);
+        }
+        
+        animateCounter(totalPool, 2000);
+        
+        setTimeout(()=>{
+          overlay.classList.remove('active');
+          if(onComplete) onComplete(winner);
+        }, 4500);
+      }, 500);
+    }
+  }, 150);
+}
+
+// =========================================================
+// LUCKY USER RULE EXECUTION
+// =========================================================
+async function executeLuckyUserRule(){
+  const players = Object.values(allUsers).filter(u => !u.isAdmin);
+  if(players.length < 1){
+    alert('Not enough players for Lucky User rule!');
+    return;
+  }
+  
+  const totalSpent = getTotalSpentOnSpins();
+  if(totalSpent <= 0){
+    alert('No furlongs in the community spin pool!');
+    return;
+  }
+  
+  const sortedByDistance = [...players].sort((a,b) => (b.distance||0) - (a.distance||0));
+  const bottom10 = sortedByDistance.slice(-10);
+  
+  if(bottom10.length === 0){
+    alert('No eligible players for Lucky User rule!');
+    return;
+  }
+  
+  playLuckyUserAnimation(bottom10, totalSpent, async (winner) => {
+    const winnerUser = await DB.getUser(winner.username);
+    if(winnerUser) {
+      winnerUser.distance = (winnerUser.distance || 0) + totalSpent;
+      await DB.saveUser(winner.username, winnerUser);
+    }
+    
+    const updatedUsers = {...allUsers};
+    Object.keys(updatedUsers).forEach(username => {
+      if(updatedUsers[username] && !updatedUsers[username].isAdmin) {
+        updatedUsers[username].totalSpentOnSpins = 0;
+      }
+    });
+    await DB.setUsers(updatedUsers);
+    allUsers = updatedUsers;
+    
+    refreshLeaderboard();
+    renderTrack();
+    renderAdminPlayerList();
+    renderAdminUserMgmtList();
+    refreshPowerTab();
+    
+    alert(`🍀 Lucky Winner: ${winner.horse.name} received ${totalSpent} furlongs!\nCommunity pool reset to 0.`);
+  });
 }
 
 // =========================================================
