@@ -678,7 +678,18 @@
           <div class="rule-chip" data-rule="sum_x2" onclick="selectRule(this)">Sum × 2</div>
           <div class="rule-chip lucky-user" data-rule="lucky_user" onclick="selectLuckyUserRule(this)">🍀 Lucky User</div>
         </div>
+  <!-- NEW BUTTON ADDED HERE -->
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(139,26,26,.15);">
+          <button class="btn btn-sm btn-outline" onclick="adminBunchUp()" 
+            style="border-color:var(--derby-green);color:var(--derby-green);">
+            🐎 Bunch Up Scores
+          </button>
+          <span style="font-size:11px;color:#666;margin-left:8px;">
+            (Adds 40% of gap to users behind the leader)
+          </span>
+        </div>
       </div>
+
 
       <div class="admin-section">
         <h4>🏁 Race Length</h4>
@@ -1207,6 +1218,81 @@ async function adminResetRace(){
   renderAdminPlayerList();
   renderAdminUserMgmtList();
   alert('Race reset! All distances cleared.');
+}
+
+// =========================================================
+// ADMIN BUNCH UP SCORES
+// =========================================================
+async function adminBunchUp(){
+  // First, find the top user's furlongs as a CONSTANT
+  const players = Object.values(allUsers).filter(u => !u.isAdmin);
+  if(players.length < 2){
+    alert('Need at least 2 players to bunch up scores!');
+    return;
+  }
+  
+  // Find the maximum distance (TOP) - captured ONCE before any updates
+  const topFurlongs = Math.max(...players.map(u => u.distance || 0));
+  
+  if(topFurlongs <= 0){
+    alert('No one has rolled yet! Top furlongs is 0.');
+    return;
+  }
+  
+  // Confirm with admin
+  const confirmMsg = `🐎 Bunch Up Scores\n\n` +
+    `Top user has: ${topFurlongs} furlongs\n\n` +
+    `All users with LESS than ${topFurlongs} will get:\n` +
+    `NEW = OLD + 40% × (${topFurlongs} - OLD)\n\n` +
+    `Example: If user has 32f and top is 80f:\n` +
+    `New = 32 + 0.4 × (80-32) = 32 + 19.2 = 51f\n\n` +
+    `Proceed?`;
+  
+  if(!confirm(confirmMsg)) return;
+  
+  // Now iterate and calculate using the CONSTANT topFurlongs
+  const usersToUpdate = {...allUsers};
+  let updatedCount = 0;
+  let logDetails = [];
+  
+  Object.keys(usersToUpdate).forEach(username => {
+    const user = usersToUpdate[username];
+    if(user.isAdmin) return; // Skip admin users
+    
+    const currentDist = user.distance || 0;
+    
+    // Only adjust users who are BEHIND the top user
+    if(currentDist < topFurlongs){
+      const gap = topFurlongs - currentDist;
+      const adjustment = Math.round(gap * 0.4);
+      const newDist = currentDist + adjustment;
+      
+      user.distance = newDist;
+      updatedCount++;
+      logDetails.push(`${user.horse.name}: ${currentDist}f → ${newDist}f (+${adjustment}f)`);
+    }
+  });
+  
+  if(updatedCount === 0){
+    alert('No users need adjustment! Everyone is at or near the top.');
+    return;
+  }
+  
+  // Save all updates to database
+  await DB.setUsers(usersToUpdate);
+  allUsers = usersToUpdate;
+  
+  // Refresh UI
+  renderAdminPlayerList();
+  renderAdminUserMgmtList();
+  refreshLeaderboard();
+  renderTrack();
+  
+  // Show summary
+  alert(`✅ Bunch Up Complete!\n\n` +
+    `Top furlongs (constant): ${topFurlongs}f\n` +
+    `Users adjusted: ${updatedCount}\n\n` +
+    `Changes:\n${logDetails.join('\n')}`);
 }
 
 function populateAdminPlayerSelect(){
