@@ -1146,7 +1146,7 @@ function selectRule(el){
 }
 
 function selectLuckyUserRule(el){
-  if(!confirm('🍀 Lucky User Rule\n\nThis will randomly distribute 20% of all accumulated spin furlongs to ONE random user.\n\nThe community pool will be reset to 0 after distribution.\n\nProceed?')){
+  if(!confirm('🍀 Lucky User Rule\n\nThis will randomly distribute 50% of all accumulated spin furlongs to ONE random user.\n\nThe community pool will be reset to 0 after distribution.\n\nProceed?')){
     document.querySelectorAll('.rule-chip').forEach(c=>c.classList.remove('active'));
     const prevRule = currentSettings.rule || 'sum';
     const prevChip = document.querySelector(`.rule-chip[data-rule="${prevRule}"]`);
@@ -2099,8 +2099,8 @@ async function playLuckyUserAnimation(eligibleUsers, distributionAmount, onCompl
     `<img class="lucky-contender-avatar" src="${u.photo || ''}" data-username="${u.username}" alt="${u.horse.name}">`
   ).join('');
   
-  // CHANGE: Update text to reflect 20% distribution
-  poolAmount.textContent = `🎰 Prize: ${distributionAmount} Furlongs (20% of Pool)`;
+  // CHANGE: Update text to reflect 50% distribution
+  poolAmount.textContent = `🎰 Prize: ${distributionAmount} Furlongs (50% of Pool)`;
   
   overlay.classList.add('active');
   
@@ -2177,8 +2177,8 @@ async function executeLuckyUserRule(){
   // CHANGE: Use ALL players instead of bottom 10
   const eligibleUsers = [...players];
   
-  // CHANGE: Calculate 20% of the pool instead of 100%
-  const distributionAmount = Math.floor(totalSpent * 0.20);
+  // CHANGE: Calculate 50% of the pool instead of 100%
+  const distributionAmount = Math.floor(totalSpent * 0.50);
   
   if(eligibleUsers.length === 0){
     alert('No eligible players for Lucky User rule!');
@@ -2191,7 +2191,7 @@ async function executeLuckyUserRule(){
   playLuckyUserAnimation(displayUsers, distributionAmount, async (winner) => {
     const winnerUser = await DB.getUser(winner.username);
     if(winnerUser) {
-      // Add only 20% of the pool to the winner
+      // Add only 50% of the pool to the winner
       winnerUser.distance = (winnerUser.distance || 0) + distributionAmount;
       await DB.saveUser(winner.username, winnerUser);
     }
@@ -2211,8 +2211,8 @@ async function executeLuckyUserRule(){
     renderAdminUserMgmtList();
     refreshPowerTab();
     
-    // CHANGE: Update alert message to reflect 20% distribution
-    alert(`🍀 Lucky Winner: ${winner.horse.name} received ${distributionAmount} furlongs (20% of pool)!\nRemaining ${totalSpent - distributionAmount} furlongs are forfeited.\nCommunity pool reset to 0.`);
+    // CHANGE: Update alert message to reflect 50% distribution
+    alert(`🍀 Lucky Winner: ${winner.horse.name} received ${distributionAmount} furlongs (50% of pool)!\nRemaining ${totalSpent - distributionAmount} furlongs are forfeited.\nCommunity pool reset to 0.`);
   });
 }
 
